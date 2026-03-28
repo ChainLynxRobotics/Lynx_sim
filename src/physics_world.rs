@@ -1,8 +1,8 @@
 use rapier3d::{
     math::Vec3,
     prelude::{
-        BroadPhaseBvh, CCDSolver, DefaultBroadPhase, ImpulseJointSet, IntegrationParameters,
-        IslandManager, MultibodyJointSet, NarrowPhase,
+        BroadPhaseBvh, CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet,
+        IntegrationParameters, IslandManager, MultibodyJointSet, NarrowPhase, RigidBodySet,
     },
 };
 use whippyunits::{unit, value};
@@ -13,6 +13,8 @@ pub struct PhysicsWorld {
     pub island_manager: IslandManager,
     pub broad_phase: BroadPhaseBvh,
     pub narrow_phase: NarrowPhase,
+    pub rigid_body_set: RigidBodySet,
+    pub collider_set: ColliderSet,
     pub impulse_joint_set: ImpulseJointSet,
     pub multibody_joint_set: MultibodyJointSet,
     pub ccd_solver: CCDSolver,
@@ -30,6 +32,8 @@ impl PhysicsWorld {
             island_manager: IslandManager::new(),
             broad_phase: DefaultBroadPhase::new(),
             narrow_phase: NarrowPhase::new(),
+            rigid_body_set: RigidBodySet::new(),
+            collider_set: ColliderSet::new(),
             impulse_joint_set: ImpulseJointSet::new(),
             multibody_joint_set: MultibodyJointSet::new(),
             ccd_solver: CCDSolver::new(),
