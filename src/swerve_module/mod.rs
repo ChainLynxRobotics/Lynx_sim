@@ -7,7 +7,7 @@ struct SwerveModule {
     pub azumith_handle: RigidBodyHandle,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 struct SwerveModuleConfig {
     pub wheel_radius: unit!(m, f32),
     pub wheel_width: unit!(m, f32),
