@@ -2,12 +2,16 @@ use rapier3d::{
     math::Vec3,
     prelude::{
         BroadPhaseBvh, CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet,
-        IntegrationParameters, IslandManager, MultibodyJointSet, NarrowPhase, RigidBodySet,
+        IntegrationParameters, IslandManager, MultibodyJointSet, NarrowPhase, PhysicsPipeline,
+        RigidBodySet,
     },
 };
 use whippyunits::{unit, value};
 
+use crate::physics_world;
+
 pub struct PhysicsWorld {
+    pub physics_pipeline: PhysicsPipeline,
     pub gravity: Vec3,
     pub integration_parameters: IntegrationParameters,
     pub island_manager: IslandManager,
@@ -27,6 +31,7 @@ impl PhysicsWorld {
         integration_parameters.dt = value!(dt, s, f32);
 
         return PhysicsWorld {
+            physics_pipeline: PhysicsPipeline::new(),
             gravity: Vec3::new(0.0, 0.0, -9.80665),
             integration_parameters: integration_parameters,
             island_manager: IslandManager::new(),
@@ -40,5 +45,21 @@ impl PhysicsWorld {
             physics_hooks: (),
             event_handlers: (),
         };
+    }
+    pub fn step(&mut self) {
+        self.physics_pipeline.step(
+            self.gravity,
+            &self.integration_parameters,
+            &mut self.island_manager,
+            &mut self.broad_phase,
+            &mut self.narrow_phase,
+            &mut self.rigid_body_set,
+            &mut self.collider_set,
+            &mut self.impulse_joint_set,
+            &mut self.multibody_joint_set,
+            &mut self.ccd_solver,
+            &mut self.physics_hooks,
+            &mut self.event_handlers,
+        );
     }
 }
