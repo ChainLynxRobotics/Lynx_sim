@@ -17,7 +17,7 @@ pub struct SwerveModuleConfig {
     pub wheel_coefficient_of_restetution: f32,
 }
 impl SwerveModuleConfig {
-    pub fn new(
+    pub const fn new(
         wheel_radius: unit!(m, f32),
         wheel_width: unit!(m, f32),
         wheel_mass: unit!(kg, f32),
