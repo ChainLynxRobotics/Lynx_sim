@@ -1,6 +1,7 @@
 use rapier3d::prelude::RigidBodyHandle;
 use whippyunits::unit;
 
+#[derive(Debug, PartialEq)]
 struct SwerveModule {
     pub config: SwerveModuleConfig,
     pub wheel_handle: RigidBodyHandle,
