@@ -12,6 +12,7 @@ use whippyunits::value;
 use self::config::SwerveModuleConfig;
 
 pub mod config;
+pub mod default_configs;
 
 #[derive(Debug, PartialEq)]
 struct SwerveModule {
