@@ -13,6 +13,7 @@ use self::config::SwerveModuleConfig;
 
 pub mod config;
 pub mod default_configs;
+mod test;
 
 #[derive(Debug, PartialEq)]
 struct SwerveModule {
