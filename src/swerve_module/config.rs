@@ -15,6 +15,9 @@ pub struct SwerveModuleConfig {
     pub wheel_center_height: unit!(m, f32),
     pub wheel_cof: f32,
     pub wheel_coefficient_of_restetution: f32,
+    pub drive_gear_ratio: f32,
+    pub turn_gear_ratio: f32,
+    pub coupling_ratio: f32,
 }
 impl SwerveModuleConfig {
     pub const fn new(
@@ -32,6 +35,9 @@ impl SwerveModuleConfig {
         wheel_center_height: unit!(m, f32),
         wheel_cof: f32,
         wheel_coefficient_of_restetution: f32,
+        drive_gear_ratio: f32,
+        turn_gear_ratio: f32,
+        coupling_ratio: f32,
     ) -> Self {
         return SwerveModuleConfig {
             wheel_radius,
@@ -48,6 +54,9 @@ impl SwerveModuleConfig {
             wheel_center_height,
             wheel_cof,
             wheel_coefficient_of_restetution,
+            drive_gear_ratio,
+            turn_gear_ratio,
+            coupling_ratio,
         };
     }
 }
