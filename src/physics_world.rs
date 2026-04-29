@@ -6,7 +6,7 @@ use rapier3d::{
         RigidBodySet,
     },
 };
-use whippyunits::{unit, value};
+use whippyunits::{quantity, unit, value};
 
 use crate::physics_world;
 
@@ -61,5 +61,10 @@ impl PhysicsWorld {
             &mut self.physics_hooks,
             &mut self.event_handlers,
         );
+    }
+}
+impl Default for PhysicsWorld {
+    fn default() -> Self {
+        return PhysicsWorld::new(quantity!(0.02, s, f32));
     }
 }
