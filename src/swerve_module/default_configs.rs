@@ -146,7 +146,10 @@ impl Mk4iWheel {
     }
 }
 
-fn generate_mk4i_swerve_config(gear_ratio: Mk4iGearRatio, wheel: Mk4iWheel) -> SwerveModuleConfig {
+pub fn generate_mk4i_swerve_config(
+    gear_ratio: Mk4iGearRatio,
+    wheel: Mk4iWheel,
+) -> SwerveModuleConfig {
     let gear_train_properties = gear_ratio.generate_gear_train_properties();
     let wheel_properties = wheel.generate_wheel_properties();
     return SwerveModuleConfig {
