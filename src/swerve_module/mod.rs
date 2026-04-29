@@ -23,7 +23,7 @@ struct SwerveModule {
 impl SwerveModule {
     pub fn new(
         config: SwerveModuleConfig,
-        module_top_center: Vector,
+        module_center: Vector,
         drive_base_handle: RigidBodyHandle,
         rigid_body_set: &mut RigidBodySet,
         collider_set: &mut ColliderSet,
@@ -31,7 +31,7 @@ impl SwerveModule {
     ) -> Self {
         let wheel = RigidBodyBuilder::dynamic()
             .translation(
-                module_top_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+                module_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             )
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
@@ -52,8 +52,7 @@ impl SwerveModule {
         .build();
         let azumith = RigidBodyBuilder::dynamic()
             .translation(
-                module_top_center
-                    - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
@@ -80,14 +79,13 @@ impl SwerveModule {
         let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
-                module_top_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+                module_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             )
             .build();
         let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
-                module_top_center
-                    - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
 
