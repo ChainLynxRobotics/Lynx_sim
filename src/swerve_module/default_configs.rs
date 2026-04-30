@@ -127,12 +127,12 @@ impl Mk4iWheel {
             Mk4iWheel::Billet => quantity!(0.00014287, kg * m ^ 2, f32),
             Mk4iWheel::Colson => quantity!(0.00019662, kg * m ^ 2, f32),
         };
-        // just random guesses
+        // https://www.chiefdelphi.com/t/wildstang-robotics-program-team-111-and-112-build-blog-2025/477716/36
         let cof = match self {
-            Mk4iWheel::Billet => 1.5f32,
-            Mk4iWheel::Colson => 1.2f32,
+            Mk4iWheel::Billet => 1.1f32,
+            Mk4iWheel::Colson => 0.8f32,
         };
-        // same here
+        // just a random guess
         let coefficient_of_restituation = 0.01f32;
         return WheelProperties {
             radius,
