@@ -1,6 +1,5 @@
 #[cfg(test)]
 mod test {
-
     use crate::physics_world;
 
     use super::super::default_configs::*;
