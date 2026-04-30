@@ -8,13 +8,12 @@ simba = { git = "https://github.com/aabizri/simba/", branch = "wip-nightly-1.95"
 
 [dependencies]
 culit = "0.6.7"
-kiss3d = { version = "0.41.0", optional = true }
 rapier3d = { version = "0.32.0", features = ["simd-nightly"] }
 whippyunits = "0.1.2"
 
 [features]
 default = ["debug_renderer"]
-debug_renderer = ["dep:kiss3d"]
+debug_renderer = []
 
 [profile.release]
 lto = "thin"
