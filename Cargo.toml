@@ -9,6 +9,7 @@ simba = { git = "https://github.com/aabizri/simba/", branch = "wip-nightly-1.95"
 [dependencies]
 culit = "0.6.7"
 rapier3d = { version = "0.32.0", features = ["simd-nightly"] }
+sdl3 = { version = "0.18.0", features = ["build-from-source-static"] }
 whippyunits = "0.1.2"
 
 [features]

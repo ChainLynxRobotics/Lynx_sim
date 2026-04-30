@@ -54,6 +54,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
+name = "cc"
+version = "1.2.61"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d16d90359e986641506914ba71350897565610e87ce0ad9e6f28569db3dd5c6d"
+dependencies = [
+ "find-msvc-tools",
+ "shlex",
+]
+
+[[package]]
+name = "cmake"
+version = "0.1.58"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0f78a02292a74a88ac736019ab962ece0bc380e3f977bf72e376c5d78ff0678"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "culit"
 version = "0.6.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -88,6 +107,12 @@ name = "equivalent"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
+
+[[package]]
+name = "find-msvc-tools"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5baebc0774151f905a1a2cc41989300b1e6fbb29aff0ceffa1064fdd3088d582"
 
 [[package]]
 name = "foldhash"
@@ -258,6 +283,12 @@ name = "itoa"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92ecc6618181def0457392ccd0ee51198e065e016d1d527a7ac1b6dc7c1f09d2"
+
+[[package]]
+name = "libc"
+version = "0.2.186"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
 name = "libm"
@@ -527,6 +558,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4e27ee8bb91ca0adcf0ecb116293afa12d393f9c2b9b9cd54d33e8078fe19839"
 
 [[package]]
+name = "rpkg-config"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5a2d2f3481209a6b42eec2fbb49063fb4e8d35b57023401495d4fe0f85c817f0"
+
+[[package]]
 name = "rstar"
 version = "0.12.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -550,6 +587,92 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96b02de82ddbe1b636e6170c21be622223aea188ef2e139be0a5b219ec215323"
 dependencies = [
  "bytemuck",
+]
+
+[[package]]
+name = "sdl3"
+version = "0.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "96e613fca5924ccab8ab8369ab292a1b4720b125e98007fbda163f4ce7176472"
+dependencies = [
+ "bitflags",
+ "libc",
+ "sdl3-image-sys",
+ "sdl3-mixer-sys",
+ "sdl3-sys",
+ "sdl3-ttf-sys",
+]
+
+[[package]]
+name = "sdl3-image-src"
+version = "3.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d415de3fa6e610c3ae4994838f222d50ecb1d4dd8f8618f4049de2f41956a000"
+
+[[package]]
+name = "sdl3-image-sys"
+version = "0.6.2+SDL-image-3.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "64a0c5e6f5874aef7cdc76ff36855bffd98f52feb9df3f5b7f443e0beb4472fe"
+dependencies = [
+ "cmake",
+ "rpkg-config",
+ "sdl3-image-src",
+ "sdl3-sys",
+]
+
+[[package]]
+name = "sdl3-mixer-src"
+version = "3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1eadf2552e54f487570e82454e325358f8f4ce1b602ce5837206659805c9f2b8"
+
+[[package]]
+name = "sdl3-mixer-sys"
+version = "0.6.1+SDL-mixer-3.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f493bd0cf6f2ba15ab5e40dea89ca16fee6e1a6a7926a549a60225ccc033cfee"
+dependencies = [
+ "cmake",
+ "rpkg-config",
+ "sdl3-mixer-src",
+ "sdl3-sys",
+]
+
+[[package]]
+name = "sdl3-src"
+version = "3.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d98f1cdcc5eb877ad663216c3133bfa5af469628c9573b3d2364e584efe19ab0"
+
+[[package]]
+name = "sdl3-sys"
+version = "0.6.3+SDL-3.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c7adc59563535710602c8e7035297fd73d2506c0c61677f40aeb8917c0e86a01"
+dependencies = [
+ "cc",
+ "cmake",
+ "rpkg-config",
+ "sdl3-src",
+]
+
+[[package]]
+name = "sdl3-ttf-src"
+version = "3.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f28923d2ce72ff317d8eb7cec97ddfb8f351c330d7bcbf8c76e91332122c93b3"
+
+[[package]]
+name = "sdl3-ttf-sys"
+version = "0.6.0+SDL-ttf-3.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c30da3dcd7e062f19350b47a532f7629c42801b801687535fd31e8ba2adfd71d"
+dependencies = [
+ "cmake",
+ "rpkg-config",
+ "sdl3-sys",
+ "sdl3-ttf-src",
 ]
 
 [[package]]
@@ -594,6 +717,12 @@ dependencies = [
  "serde_core",
  "zmij",
 ]
+
+[[package]]
+name = "shlex"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "simba"
@@ -655,6 +784,7 @@ version = "0.1.0"
 dependencies = [
  "culit",
  "rapier3d",
+ "sdl3",
  "whippyunits",
 ]
 
