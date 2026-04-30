@@ -1,0 +1,18 @@
+[package]
+name = "swerve-sim-3d"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+culit = "0.6.7"
+rapier3d = { version = "0.32.0", features = ["simd-nightly"] }
+sdl3 = { version = "0.18.0", features = ["build-from-source-static"] }
+whippyunits = "0.1.2"
+
+[features]
+default = ["debug_renderer"]
+debug_renderer = []
+
+[profile.release]
+lto = "thin"
+debug = true
