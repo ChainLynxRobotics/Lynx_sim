@@ -802,6 +802,9 @@ dependencies = [
 [[package]]
 name = "testing-app"
 version = "0.1.0"
+dependencies = [
+ "swerve-sim-3d",
+]
 
 [[package]]
 name = "thiserror"
