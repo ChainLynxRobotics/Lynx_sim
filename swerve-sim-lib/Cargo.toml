@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 culit = "0.6.7"
-rapier3d = { version = "0.32.0", features = ["simd-nightly"] }
+rapier3d = { version = "0.32.0", features = ["simd-nightly", "debug-render"] }
 sdl3 = { version = "0.18.0", features = ["build-from-source-static"] }
 whippyunits = "0.1.2"
 
