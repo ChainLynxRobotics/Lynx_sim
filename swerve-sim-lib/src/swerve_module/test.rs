@@ -91,8 +91,4 @@ mod test {
         println!("{:?}", azumith.position());
         panic!()
     }
-    #[test]
-    fn test_window() {
-        crate::util::debug_render::spawn_debug_window();
-    }
 }
