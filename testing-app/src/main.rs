@@ -200,7 +200,6 @@ fn main() {
                 } => {
                     physics_world.step();
                 }
-
                 _ => {}
             }
         }
