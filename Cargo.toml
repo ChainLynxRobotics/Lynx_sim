@@ -1,6 +1,12 @@
+cargo-features = ["profile-rustflags"]
 [workspace]
 resolver = "3"
 members = ["swerve-sim-lib", "testing-app"]
 
 [patch.crates-io]
 simba = { git = "https://github.com/aabizri/simba/", branch = "wip-nightly-1.95" }
+
+[profile.release]
+rustflags = ["-C targe_cpu=x86-64-v3"]
+lto = "thin"
+debug = true
