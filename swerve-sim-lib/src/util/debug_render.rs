@@ -344,7 +344,6 @@ pub fn draw_debug_window(
         multibody_joints,
         narrow_phase,
     );
-    println!("camera pose: {:?}", window.camera.pose);
     for event in window.event_pump.poll_iter() {
         match event {
             Event::Quit { .. }
