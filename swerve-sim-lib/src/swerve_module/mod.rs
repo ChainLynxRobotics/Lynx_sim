@@ -16,7 +16,7 @@ pub mod default_configs;
 mod test;
 
 #[derive(Debug, PartialEq)]
-struct SwerveModule {
+pub struct SwerveModule {
     pub config: SwerveModuleConfig,
     pub wheel_handle: RigidBodyHandle,
     pub azumith_handle: RigidBodyHandle,
