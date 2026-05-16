@@ -194,6 +194,13 @@ fn main() {
                         },
                     )
                 }
+                Event::KeyDown {
+                    keycode: Some(Keycode::P),
+                    ..
+                } => {
+                    physics_world.step();
+                }
+
                 _ => {}
             }
         }
