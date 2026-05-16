@@ -8,8 +8,6 @@ use rapier3d::{
 };
 use whippyunits::{quantity, unit, value};
 
-use crate::physics_world;
-
 pub struct PhysicsWorld {
     pub physics_pipeline: PhysicsPipeline,
     pub gravity: Vec3,
