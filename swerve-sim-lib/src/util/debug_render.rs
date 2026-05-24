@@ -31,6 +31,7 @@ impl Camera {
         if cam_space_point.translation.x < NEAR_CLIP {
             return None;
         }
+        // math reference https://www.youtube.com/watch?v=eoXn6nwV694
         // x is forward so y is x on the screen
         let screen_x: f32 = (cam_space_point.translation.y) * (1.0 / (self.fov / 2.0).tan())
             / cam_space_point.translation.x;
