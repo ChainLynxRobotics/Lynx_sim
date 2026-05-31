@@ -53,7 +53,7 @@ impl SwerveModule {
         .build();
         let azumith = RigidBodyBuilder::dynamic()
             .translation(
-                module_center - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
@@ -69,7 +69,7 @@ impl SwerveModule {
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
-        .rotation(Vec3::new(PI, 0.0, 0.0));
+        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0));
 
         let wheel = rigid_body_set.insert(wheel);
         let azumith = rigid_body_set.insert(azumith);
