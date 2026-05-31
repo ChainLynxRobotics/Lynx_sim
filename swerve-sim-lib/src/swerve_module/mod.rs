@@ -32,7 +32,7 @@ impl SwerveModule {
     ) -> Self {
         let wheel = RigidBodyBuilder::dynamic()
             .translation(
-                module_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+                module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             )
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
