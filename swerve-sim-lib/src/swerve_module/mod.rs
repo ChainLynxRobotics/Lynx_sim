@@ -102,7 +102,7 @@ impl SwerveModule {
             .build();
 
         joint_set.insert(drive_base_handle, wheel, wheel_joint, true);
-        joint_set.insert(drive_base_handle, wheel, azumith_joint, true);
+        joint_set.insert(drive_base_handle, azumith, azumith_joint, true);
         return SwerveModule {
             config,
             wheel_handle: wheel,
