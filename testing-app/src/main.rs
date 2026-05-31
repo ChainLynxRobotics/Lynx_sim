@@ -19,7 +19,7 @@ use swerve_sim_3d::{
 fn main() {
     let (window, context) = swerve_sim_3d::util::debug_render::spawn_debug_window();
     let mut physics_world = physics_world::PhysicsWorld::default();
-    let mut drive_base = RigidBodyBuilder::dynamic().gravity_scale(0.0).build();
+    let mut drive_base = RigidBodyBuilder::dynamic().build();
     drive_base.set_locked_axes(LockedAxes::all(), false);
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
     let swerve_module = SwerveModule::new(
