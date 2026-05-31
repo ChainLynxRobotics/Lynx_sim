@@ -50,6 +50,11 @@ impl SwerveModule {
                 value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
+        .collision_groups(InteractionGroups::new(
+            Group::GROUP_2,
+            Group::GROUP_1,
+            rapier3d::geometry::InteractionTestMode::Or,
+        ))
         .build();
         let azumith = RigidBodyBuilder::dynamic()
             .translation(
@@ -69,7 +74,13 @@ impl SwerveModule {
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
-        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0));
+        .collision_groups(InteractionGroups::new(
+            Group::GROUP_2,
+            Group::GROUP_1,
+            rapier3d::geometry::InteractionTestMode::Or,
+        ))
+        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
+        .build();
 
         let wheel = rigid_body_set.insert(wheel);
         let azumith = rigid_body_set.insert(azumith);
