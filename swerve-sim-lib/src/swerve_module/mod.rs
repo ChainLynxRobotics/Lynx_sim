@@ -56,6 +56,7 @@ impl SwerveModule {
             rapier3d::geometry::InteractionTestMode::Or,
         ))
         .build();
+
         let azumith = RigidBodyBuilder::dynamic()
             .translation(
                 module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
