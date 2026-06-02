@@ -1,20 +1,22 @@
 use rapier3d::{
     dynamics::{ImpulseJointSet, MultibodyJointSet, RigidBodySet},
     geometry::{ColliderSet, NarrowPhase},
-    math::{Pose3, Vec3, Vector},
+    math::{Pose3, Vector},
     pipeline::{DebugRenderBackend, DebugRenderMode, DebugRenderPipeline, DebugRenderStyle},
 };
 use sdl3::{
     EventPump, Sdl,
-    event::Event,
-    keyboard::Keycode,
     pixels::{self, Color},
     render::{Canvas, FPoint},
     video::Window,
 };
 
-const FAR_CLIP: f32 = 10000.0;
 const NEAR_CLIP: f32 = 0.0001;
+#[derive(PartialEq, Debug, Default)]
+struct ScreenSpacePoint {
+    x: f32,
+    y: f32,
+}
 
 pub struct Camera {
     pub fov: f32,
@@ -24,26 +26,51 @@ pub struct Camera {
     pub y_pixels: u32,
 }
 impl Camera {
-    fn convert_world_coordinates_to_screen_coordates(&self, point: Vector) -> Option<(f32, f32)> {
+    fn convert_world_space_to_cam_space(&self, point: Vector) -> Vector {
         let point = Pose3::from_translation(point);
         let inverse_cam = self.pose.inverse();
-        let cam_space_point = inverse_cam * point;
-        if cam_space_point.translation.x < NEAR_CLIP {
-            return None;
-        }
+        return (inverse_cam * point).translation;
+    }
+    fn convert_world_coordinates_to_screen_coordates(&self, point: Vector) -> ScreenSpacePoint {
+        let cam_space_point = self.convert_world_space_to_cam_space(point);
+
         // math reference https://www.youtube.com/watch?v=eoXn6nwV694
         // x is forward so y is x on the screen
-        let screen_x: f32 = (cam_space_point.translation.y) * (1.0 / (self.fov / 2.0).tan())
-            / cam_space_point.translation.x;
-        let screen_y: f32 = (cam_space_point.translation.z)
+        let screen_x: f32 =
+            (cam_space_point.y) * (1.0 / (self.fov / 2.0).tan()) / cam_space_point.x;
+        let screen_y: f32 = (cam_space_point.z)
             * (1.0 / ((self.fov / self.aspect_ratio) / 2.0).tan())
-            / cam_space_point.translation.x;
+            / cam_space_point.x;
 
         // convert from a -1 to 1 range to 0 to 1
         let screen_x = -(screen_x / 2.0) + 0.5;
         let screen_y = (-(screen_y / 2.0) / self.aspect_ratio) + 0.5;
 
-        return Some((screen_x, screen_y));
+        return ScreenSpacePoint {
+            x: screen_x,
+            y: screen_y,
+        };
+    }
+    fn move_point_in_front_of_camera(&self, point1: Vector, point2: Vector) -> ScreenSpacePoint {
+        let point1 = self.convert_world_space_to_cam_space(point1);
+        let point2 = self.convert_world_space_to_cam_space(point2);
+        let n = 1.0 / (self.fov / 2.0).tan();
+        let m_y = (point1.y - point2.y) / (point1.x - point2.x);
+        let b_y = point1.y - (m_y * point1.x);
+        let n_y = m_y * n + b_y;
+
+        let m_z = (point1.z - point2.z) / (point1.x - point2.x);
+        let b_z = point1.z - (m_z * point1.x);
+        let n_z = m_z * n + b_z;
+
+        // convert from a -1 to 1 range to 0 to 1
+        let screen_x = -(n_y / 2.0) + 0.5;
+        let screen_y = (-(n_z / 2.0) / self.aspect_ratio) + 0.5;
+
+        ScreenSpacePoint {
+            x: screen_x,
+            y: screen_y,
+        }
     }
 }
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> pixels::Color {
@@ -87,7 +114,7 @@ mod hsla_test {
     use rapier3d::math::{Pose3, Vec3};
     use sdl3::pixels;
 
-    use crate::util::debug_render::{Camera, convert_hsla_to_rgb};
+    use crate::util::debug_render::{Camera, ScreenSpacePoint, convert_hsla_to_rgb};
 
     #[test]
     fn test_conversion() {
@@ -201,7 +228,7 @@ mod hsla_test {
                 y: 0.0,
                 z: 0.0
             }),
-            Some((0.5, 0.5))
+            ScreenSpacePoint { x: 0.5, y: 0.5 }
         );
         assert_eq!(
             camera.convert_world_coordinates_to_screen_coordates(Vec3 {
@@ -209,7 +236,7 @@ mod hsla_test {
                 y: 0.0,
                 z: 0.0
             }),
-            Some((0.5, 0.5))
+            ScreenSpacePoint { x: 0.5, y: 0.5 }
         );
         camera.pose = Pose3::new(
             camera.pose.translation,
@@ -219,43 +246,113 @@ mod hsla_test {
                 z: PI / -4.0,
             },
         );
-        let point = camera
-            .convert_world_coordinates_to_screen_coordates(Vec3 {
-                x: 0.0,
+        let point = camera.convert_world_coordinates_to_screen_coordates(Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        });
+        assert_approx_eq!(point.x, 0.0);
+        assert_approx_eq!(point.y, 0.5);
+        camera.pose = Pose3::new(Vec3::default(), Vec3::default());
+        let point = camera.convert_world_coordinates_to_screen_coordates(Vec3 {
+            x: 1.0,
+            y: 0.0,
+            z: 1.0,
+        });
+        assert_approx_eq!(point.x, 0.5);
+        assert_approx_eq!(point.y, 0.0);
+    }
+
+    #[test]
+    fn test_move_point_infront_of_camera() {
+        let mut camera = Camera {
+            fov: PI / 2.0,
+            pose: Pose3::from_translation(Vec3 {
+                x: -2.0,
                 y: 0.0,
                 z: 0.0,
-            })
-            .unwrap();
-        assert_approx_eq!(point.0, 0.0);
-        assert_approx_eq!(point.1, 0.5);
-        camera.pose = Pose3::new(Vec3::default(), Vec3::default());
-        let point = camera
-            .convert_world_coordinates_to_screen_coordates(Vec3 {
-                x: 1.0,
-                y: 0.0,
-                z: 1.0,
-            })
-            .unwrap();
-        assert_approx_eq!(point.0, 0.5);
-        assert_approx_eq!(point.1, 0.0);
-
-        camera.pose = Pose3::new(
-            Vec3::default(),
-            Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: PI / -4.0,
-            },
+            }),
+            aspect_ratio: 1.0,
+            x_pixels: 640,
+            y_pixels: 640,
+        };
+        assert_eq!(
+            camera.move_point_in_front_of_camera(
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0
+                },
+                Vec3 {
+                    x: -2.0,
+                    y: 0.0,
+                    z: 0.0
+                }
+            ),
+            ScreenSpacePoint { x: 0.5, y: 0.5 }
         );
-        let point = camera
-            .convert_world_coordinates_to_screen_coordates(Vec3 {
-                x: 1.0,
-                y: 0.0,
-                z: 1.0,
-            })
-            .unwrap();
-        // assert_approx_eq!(point.0, 0.0);
-        // assert_approx_eq!(point.1, 0.0);
+
+        assert_eq!(
+            camera.move_point_in_front_of_camera(
+                Vec3 {
+                    x: -1.0,
+                    y: 0.0,
+                    z: 0.0
+                },
+                Vec3 {
+                    x: -2.0,
+                    y: 0.0,
+                    z: 0.0
+                }
+            ),
+            ScreenSpacePoint { x: 0.5, y: 0.5 }
+        );
+
+        assert_eq!(
+            camera.move_point_in_front_of_camera(
+                Vec3 {
+                    x: 1.0,
+                    y: 0.0,
+                    z: 0.0
+                },
+                Vec3 {
+                    x: -2.0,
+                    y: 0.0,
+                    z: 0.0
+                }
+            ),
+            ScreenSpacePoint { x: 0.5, y: 0.5 }
+        );
+        assert_eq!(
+            camera.move_point_in_front_of_camera(
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0
+                },
+                Vec3 {
+                    x: -2.0,
+                    y: 1.0,
+                    z: 0.0
+                }
+            ),
+            ScreenSpacePoint { x: 0.25, y: 0.5 }
+        );
+        assert_eq!(
+            camera.move_point_in_front_of_camera(
+                Vec3 {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0
+                },
+                Vec3 {
+                    x: -2.0,
+                    y: -1.0,
+                    z: 0.0
+                }
+            ),
+            ScreenSpacePoint { x: 0.75, y: 0.5 }
+        );
     }
 }
 
@@ -272,36 +369,33 @@ impl DebugRenderBackend for DebugWindow {
         b: rapier3d::prelude::Vector,
         color: rapier3d::prelude::DebugColor,
     ) {
-        let a_screenspace = match self.camera.convert_world_coordinates_to_screen_coordates(a) {
-            Some(p) => p,
-            None => return,
+        if self.camera.convert_world_space_to_cam_space(a).x < NEAR_CLIP
+            && self.camera.convert_world_space_to_cam_space(b).x < NEAR_CLIP
+        {
+            return;
+        }
+        let a_screenspace = if self.camera.convert_world_space_to_cam_space(a).x >= NEAR_CLIP {
+            self.camera.convert_world_coordinates_to_screen_coordates(a)
+        } else {
+            self.camera.move_point_in_front_of_camera(b, a)
         };
-        let b_screenspace = match self.camera.convert_world_coordinates_to_screen_coordates(b) {
-            Some(p) => p,
-            None => return,
+
+        let b_screenspace = if self.camera.convert_world_space_to_cam_space(b).x >= NEAR_CLIP {
+            self.camera.convert_world_coordinates_to_screen_coordates(b)
+        } else {
+            self.camera.move_point_in_front_of_camera(a, b)
         };
-        // println!(
-        //     "point a x: {:?}\npoint a y: {:?}",
-        //     a_screenspace.0 * self.camera.x_pixels as f32,
-        //     a_screenspace.1 * self.camera.y_pixels as f32
-        // );
-        // println!(
-        //     "point b x: {:?}\npoint b y: {:?}",
-        //     b_screenspace.0 * self.camera.x_pixels as f32,
-        //     b_screenspace.1 * self.camera.y_pixels as f32,
-        // );
-        // println!("color: {:?}", convert_hsla_to_rgb(color));
-        // println!();
+
         self.canvas.set_draw_color(convert_hsla_to_rgb(color));
         self.canvas
             .draw_line(
                 FPoint::new(
-                    a_screenspace.0 * self.camera.x_pixels as f32,
-                    a_screenspace.1 * self.camera.y_pixels as f32,
+                    a_screenspace.x * self.camera.x_pixels as f32,
+                    a_screenspace.y * self.camera.y_pixels as f32,
                 ),
                 FPoint::new(
-                    b_screenspace.0 * self.camera.x_pixels as f32,
-                    b_screenspace.1 * self.camera.y_pixels as f32,
+                    b_screenspace.x * self.camera.x_pixels as f32,
+                    b_screenspace.y * self.camera.y_pixels as f32,
                 ),
             )
             .unwrap();
@@ -313,7 +407,7 @@ pub fn spawn_debug_window() -> (Canvas<Window>, Sdl) {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("swerve sim debug window", 800, 600)
+        .window("swerve sim debug window", 1000, 1000)
         .position_centered()
         .build()
         .unwrap();
