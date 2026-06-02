@@ -2,8 +2,8 @@ use std::f32::consts::PI;
 
 use rapier3d::{
     dynamics::{LockedAxes, RigidBodyBuilder},
-    math::{Pose3, Vec3},
-    na::Translation3,
+    geometry::ColliderBuilder,
+    math::{Pose3, Vec3, Vector},
 };
 use sdl3::{event::Event, keyboard::Keycode};
 use std::time::Duration;
@@ -33,6 +33,16 @@ fn main() {
         &mut physics_world.rigid_body_set,
         &mut physics_world.collider_set,
         &mut physics_world.multibody_joint_set,
+    );
+    let ground = RigidBodyBuilder::fixed()
+        .translation(Vector::new(0.0, 0.0, -1.0))
+        .build();
+    let ground_colider = ColliderBuilder::cuboid(1.0, 1.0, 0.1).build();
+    let ground = physics_world.rigid_body_set.insert(ground);
+    physics_world.collider_set.insert_with_parent(
+        ground_colider,
+        ground,
+        &mut physics_world.rigid_body_set,
     );
     let (size_x, size_y) = window.output_size().unwrap();
     let mut window = DebugWindow {
