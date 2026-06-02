@@ -54,14 +54,15 @@ impl Camera {
     fn move_point_in_front_of_camera(&self, point1: Vector, point2: Vector) -> ScreenSpacePoint {
         let point1 = self.convert_world_space_to_cam_space(point1);
         let point2 = self.convert_world_space_to_cam_space(point2);
-        let n = 1.0 / (self.fov / 2.0).tan();
+        let n_y = 1.0 / (self.fov / 2.0).tan();
         let m_y = (point1.y - point2.y) / (point1.x - point2.x);
         let b_y = point1.y - (m_y * point1.x);
-        let n_y = m_y * n + b_y;
+        let n_y = m_y * n_y + b_y;
 
+        let n_z = 1.0 / ((self.fov / self.aspect_ratio) / 2.0).tan();
         let m_z = (point1.z - point2.z) / (point1.x - point2.x);
         let b_z = point1.z - (m_z * point1.x);
-        let n_z = m_z * n + b_z;
+        let n_z = m_z * n_z + b_z;
 
         // convert from a -1 to 1 range to 0 to 1
         let screen_x = -(n_y / 2.0) + 0.5;
@@ -407,7 +408,7 @@ pub fn spawn_debug_window() -> (Canvas<Window>, Sdl) {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("swerve sim debug window", 1000, 1000)
+        .window("swerve sim debug window", 750, 750)
         .position_centered()
         .build()
         .unwrap();
