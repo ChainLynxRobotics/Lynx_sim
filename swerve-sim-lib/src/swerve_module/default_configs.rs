@@ -133,7 +133,7 @@ impl Mk4iWheel {
             Mk4iWheel::Colson => 0.8f32,
         };
         // just a random guess
-        let coefficient_of_restituation = 0.01f32;
+        let coefficient_of_restituation = 0.0f32;
         return WheelProperties {
             radius,
             width,
