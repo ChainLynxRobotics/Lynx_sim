@@ -1,6 +1,8 @@
 use std::f32::consts::PI;
 
+use rapier3d::geometry::Group;
 use rapier3d::{
+    geometry::InteractionGroups,
     math::{Vec3, Vector},
     prelude::{
         ColliderBuilder, ColliderSet, MassProperties, MultibodyJointSet, RevoluteJointBuilder,
