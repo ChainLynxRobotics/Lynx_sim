@@ -534,11 +534,11 @@ impl CameraController {
                 self.is_right_pressed = is_pressed;
                 true
             }
-            KeyCode::KeyE => {
+            KeyCode::KeyE | KeyCode::Space => {
                 self.is_up_pressed = is_pressed;
                 true
             }
-            KeyCode::KeyQ => {
+            KeyCode::KeyQ | KeyCode::ShiftLeft | KeyCode::ShiftRight => {
                 self.is_down_pressed = is_pressed;
                 true
             }
