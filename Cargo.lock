@@ -2443,6 +2443,7 @@ version = "0.1.0"
 dependencies = [
  "culit",
  "ipc-channel",
+ "ipc-types",
  "rapier3d",
  "serde",
  "whippyunits",

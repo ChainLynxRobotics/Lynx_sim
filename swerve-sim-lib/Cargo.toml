@@ -9,6 +9,7 @@ ipc-channel = "0.22.0"
 rapier3d = { version = "0.32.0", features = ["simd-nightly", "debug-render"] }
 serde = "1.0.228"
 whippyunits = "0.1.2"
+ipc-types = { path = "../ipc-types" }
 [features]
 default = ["debug_renderer"]
 debug_renderer = []

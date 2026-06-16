@@ -1,3 +1,4 @@
+use std::rc::Rc;
 use std::result::Result::Ok;
 use std::time::{Duration, Instant};
 use std::{env, process};
@@ -5,7 +6,7 @@ use std::{sync::Arc, vec};
 
 use ipc_channel::ipc::{IpcReceiver, IpcSender};
 use ipc_channel::{IpcError, ipc};
-use ipc_types::DebugLine;
+use ipc_types::{DebugLine, Message};
 use wgpu::PowerPreference::LowPower;
 use wgpu::PrimitiveTopology::TriangleList;
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
@@ -137,9 +138,14 @@ pub struct State {
     camera_buffer: Buffer,
     camera_controller: CameraController,
     camera_bind_group: BindGroup,
+    message_receiver: Rc<IpcReceiver<Message>>,
+    message_buffer: Vec<Message>,
 }
 impl State {
-    pub async fn new(window: Arc<Window>) -> anyhow::Result<Self> {
+    pub async fn new(
+        window: Arc<Window>,
+        message_receiver: Rc<IpcReceiver<Message>>,
+    ) -> anyhow::Result<Self> {
         let size = window.inner_size();
 
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
@@ -297,6 +303,8 @@ impl State {
             camera_buffer,
             camera_bind_group,
             camera_controller,
+            message_receiver,
+            message_buffer: Vec::new(),
         })
     }
 
@@ -394,19 +402,25 @@ impl State {
             bytemuck::cast_slice(&[self.camera_uniform]),
         );
     }
+
+    fn read_messages_all(&self) -> anyhow::Result<()> {
+        // let messages = get_all_messages(self.)?;
+
+        Ok(())
+    }
 }
 
 pub struct App {
     state: Option<State>,
     render_target: Instant,
-    line_receiver: IpcReceiver<DebugLine>,
+    line_receiver: Rc<IpcReceiver<Message>>,
 }
 impl App {
-    pub fn new(line_receiver: IpcReceiver<DebugLine>) -> Self {
+    pub fn new(line_receiver: IpcReceiver<Message>) -> Self {
         Self {
             state: None,
             render_target: Instant::now(),
-            line_receiver,
+            line_receiver: Rc::new(line_receiver),
         }
     }
 }
@@ -416,7 +430,8 @@ impl ApplicationHandler<State> for App {
 
         let window = Arc::new(event_loop.create_window(window_attributes).unwrap());
 
-        self.state = Some(pollster::block_on(State::new(window)).unwrap());
+        self.state =
+            Some(pollster::block_on(State::new(window, self.line_receiver.clone())).unwrap());
     }
 
     fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, event: State) {
@@ -617,7 +632,7 @@ impl CameraController {
 
 const FPS: f32 = 30.0;
 const FRAME_TIME: f32 = 1.0 / FPS;
-pub fn run(line_receiver: IpcReceiver<DebugLine>) -> anyhow::Result<()> {
+pub fn run(line_receiver: IpcReceiver<Message>) -> anyhow::Result<()> {
     env_logger::init();
 
     let event_loop = EventLoop::with_user_event().build()?;
@@ -633,9 +648,9 @@ pub fn main() {
     let args: Vec<String> = env::args().collect();
     let token = args.get(1).expect("missing argument");
 
-    let tx: IpcSender<IpcSender<DebugLine>> =
+    let tx: IpcSender<IpcSender<Message>> =
         IpcSender::connect(token.to_string()).expect("connect failed");
-    let (sender, receiver): (IpcSender<DebugLine>, IpcReceiver<DebugLine>) =
+    let (sender, receiver): (IpcSender<Message>, IpcReceiver<Message>) =
         ipc::channel().expect("Failed to make channel");
     tx.send(sender).expect("send failed");
 
@@ -646,16 +661,16 @@ pub fn main() {
     println!("After close");
 }
 
-fn get_all_lines(line_receiver: &IpcReceiver<DebugLine>) -> anyhow::Result<Vec<DebugLine>> {
-    let mut lines: Vec<DebugLine> = Vec::new();
+fn get_all_messages(line_receiver: &IpcReceiver<Message>) -> anyhow::Result<Vec<Message>> {
+    let mut messages: Vec<Message> = Vec::new();
     loop {
         match line_receiver.try_recv() {
-            Ok(l) => lines.push(l),
+            Ok(l) => messages.push(l),
             Err(e) => match e {
                 ipc_channel::TryRecvError::IpcError(ipc_error) => return Err(ipc_error.into()),
                 ipc_channel::TryRecvError::Empty => break,
             },
         }
     }
-    return Ok(lines);
+    return Ok(messages);
 }

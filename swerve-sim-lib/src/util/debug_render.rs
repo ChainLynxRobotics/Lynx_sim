@@ -1,6 +1,7 @@
 use std::{process::Command, thread, time::Duration};
 
 use ipc_channel::ipc::{self, IpcOneShotServer, IpcReceiver, IpcSender, channel};
+use ipc_types::{DebugLine, Message};
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     // https://www.baeldung.com/cs/convert-color-hsl-rgb
     let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];
@@ -50,40 +51,32 @@ mod hsla_test {
         );
     }
 }
-#[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize)]
-pub struct DebugLine {
-    point1: (f32, f32, f32),
-    point2: (f32, f32, f32),
-    color: (f32, f32, f32, f32),
-}
-pub struct DebugWindow {
-    sender: IpcSender<DebugLine>,
-}
+
 pub fn spawn_debug_window() -> () {
     let mut path = std::env::current_exe().unwrap();
     path.pop();
     path.push("debug-window");
 
     let (server, token) =
-        IpcOneShotServer::<IpcSender<DebugLine>>::new().expect("Failed to create one shot server");
+        IpcOneShotServer::<IpcSender<Message>>::new().expect("Failed to create one shot server");
     let mut child = Command::new(path)
         .arg(token)
         .spawn()
         .expect("Failed to start window process");
     let (_rx, sender) = server.accept().expect("Accept failed");
     sender
-        .send(DebugLine {
+        .send(Message::Line(DebugLine {
             point1: (0.0, 0.1, 1.0),
             point2: (-1.0, -2.5, 3.0),
             color: (0.2, 0.5, 1.0, 1.0),
-        })
+        }))
         .expect("Failed to send line");
     sender
-        .send(DebugLine {
+        .send(Message::Line(DebugLine {
             point1: (0.0, 0.1, 1.0),
             point2: (-1.0, -2.5, 3.0),
             color: (0.2, 0.5, 1.0, 1.0),
-        })
+        }))
         .expect("Failed to send line");
     thread::sleep(Duration::from_secs(10));
     // let result = child.wait().expect("Wait for the child process to finish");
