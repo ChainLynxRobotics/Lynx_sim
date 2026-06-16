@@ -9,6 +9,7 @@ use rapier3d::{
         RigidBodyBuilder, RigidBodyHandle, RigidBodySet,
     },
 };
+use whippyunits::quantity;
 use whippyunits::value;
 
 use self::config::SwerveModuleConfig;
@@ -94,18 +95,18 @@ impl SwerveModule {
         let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
-                module_center - Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+                module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             )
             .build();
         let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
-                module_center - Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
 
-        joint_set.insert(drive_base_handle, wheel, wheel_joint, true);
-        joint_set.insert(drive_base_handle, azumith, azumith_joint, true);
+        joint_set.insert(wheel, azumith, wheel_joint, true);
+        joint_set.insert(azumith, drive_base_handle, azumith_joint, true);
         return SwerveModule {
             config,
             wheel_handle: wheel,

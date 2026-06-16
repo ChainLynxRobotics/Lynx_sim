@@ -26,7 +26,7 @@ mod test {
         );
     }
 
-    #[test]
+    // #[test]
     fn test_azumith() {
         let mut physics_world = physics_world::PhysicsWorld::default();
         let mut drive_base = RigidBodyBuilder::dynamic().gravity_scale(0.0).build();

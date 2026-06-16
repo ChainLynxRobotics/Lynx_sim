@@ -5,7 +5,6 @@ use rapier3d::{
     geometry::ColliderBuilder,
     math::{Pose3, Vec3, Vector},
 };
-use sdl3::{event::Event, keyboard::Keycode};
 use std::time::Duration;
 use swerve_sim_3d::{
     physics_world,
@@ -16,7 +15,7 @@ use swerve_sim_3d::{
 };
 
 fn main() {
-    // let (window, context) = swerve_sim_3d::util::debug_render::spawn_debug_window();
+    swerve_sim_3d::util::debug_render::spawn_debug_window();
     let mut physics_world = physics_world::PhysicsWorld::default();
     let mut drive_base = RigidBodyBuilder::dynamic().build();
     drive_base.set_locked_axes(LockedAxes::all(), false);
@@ -43,26 +42,4 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
-    // let (size_x, size_y) = window.output_size().unwrap();
-    // let mut window = DebugWindow {
-    //     canvas: window,
-    //     event_pump: context.event_pump().unwrap(),
-    //     camera: Camera {
-    //         fov: PI / 2.0,
-    //         pose: Pose3::from_translation(Vec3::new(-0.5, 0.0, 0.0)),
-    //         aspect_ratio: size_x as f32 / size_y as f32,
-    //         x_pixels: size_x,
-    //         y_pixels: size_y,
-    //     },
-    // };
-    loop {
-        // swerve_sim_3d::util::debug_render::draw_debug_window(
-        //     Some(&mut window),
-        //     &physics_world.rigid_body_set,
-        //     &physics_world.collider_set,
-        //     &physics_world.impulse_joint_set,
-        //     &physics_world.multibody_joint_set,
-        //     &physics_world.narrow_phase,
-        // );
-    }
 }

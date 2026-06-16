@@ -1,7 +1,11 @@
 use std::result::Result::Ok;
 use std::time::{Duration, Instant};
+use std::{env, process};
 use std::{sync::Arc, vec};
 
+use ipc_channel::ipc::{IpcReceiver, IpcSender};
+use ipc_channel::{IpcError, ipc};
+use ipc_types::DebugLine;
 use wgpu::PowerPreference::LowPower;
 use wgpu::PrimitiveTopology::TriangleList;
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
@@ -395,12 +399,14 @@ impl State {
 pub struct App {
     state: Option<State>,
     render_target: Instant,
+    line_receiver: IpcReceiver<DebugLine>,
 }
 impl App {
-    pub fn new() -> Self {
+    pub fn new(line_receiver: IpcReceiver<DebugLine>) -> Self {
         Self {
             state: None,
             render_target: Instant::now(),
+            line_receiver,
         }
     }
 }
@@ -611,14 +617,45 @@ impl CameraController {
 
 const FPS: f32 = 30.0;
 const FRAME_TIME: f32 = 1.0 / FPS;
-pub fn run() -> anyhow::Result<()> {
+pub fn run(line_receiver: IpcReceiver<DebugLine>) -> anyhow::Result<()> {
     env_logger::init();
 
     let event_loop = EventLoop::with_user_event().build()?;
     event_loop.set_control_flow(ControlFlow::Poll);
-    let mut app = App::new();
+    let mut app = App::new(line_receiver);
 
     event_loop.run_app(&mut app)?;
 
     return Ok(());
+}
+
+pub fn main() {
+    let args: Vec<String> = env::args().collect();
+    let token = args.get(1).expect("missing argument");
+
+    let tx: IpcSender<IpcSender<DebugLine>> =
+        IpcSender::connect(token.to_string()).expect("connect failed");
+    let (sender, receiver): (IpcSender<DebugLine>, IpcReceiver<DebugLine>) =
+        ipc::channel().expect("Failed to make channel");
+    tx.send(sender).expect("send failed");
+
+    let line = receiver.recv().unwrap();
+    println!("{:?}", line);
+
+    _ = run(receiver).expect("Window failed to spawn");
+    println!("After close");
+}
+
+fn get_all_lines(line_receiver: &IpcReceiver<DebugLine>) -> anyhow::Result<Vec<DebugLine>> {
+    let mut lines: Vec<DebugLine> = Vec::new();
+    loop {
+        match line_receiver.try_recv() {
+            Ok(l) => lines.push(l),
+            Err(e) => match e {
+                ipc_channel::TryRecvError::IpcError(ipc_error) => return Err(ipc_error.into()),
+                ipc_channel::TryRecvError::Empty => break,
+            },
+        }
+    }
+    return Ok(lines);
 }
