@@ -4,11 +4,18 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.102"
 assert_approx_eq = "1.1.0"
+bytemuck = { version = "1.25.0", features = ["derive"] }
+cgmath = "0.18.0"
 culit = "0.6.7"
+env_logger = "0.11.10"
+log = "0.4.32"
+pollster = "0.4.0"
 rapier3d = { version = "0.32.0", features = ["simd-nightly", "debug-render"] }
-sdl3 = { version = "0.18.0", features = ["build-from-source-static"] }
+wgpu = "29.0.3"
 whippyunits = "0.1.2"
+winit = "0.30.13"
 
 [features]
 default = ["debug_renderer"]
