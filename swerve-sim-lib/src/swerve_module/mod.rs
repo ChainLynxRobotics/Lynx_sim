@@ -9,7 +9,6 @@ use rapier3d::{
         RigidBodyBuilder, RigidBodyHandle, RigidBodySet,
     },
 };
-use whippyunits::quantity;
 use whippyunits::value;
 
 use self::config::SwerveModuleConfig;

@@ -10,7 +10,7 @@ use rapier3d::{
     },
 };
 
-use crate::physics_world::{self, PhysicsWorld};
+use crate::physics_world::PhysicsWorld;
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     // https://www.baeldung.com/cs/convert-color-hsl-rgb
     let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];
@@ -71,7 +71,7 @@ impl DebugWindow {
 
         let (server, token) = IpcOneShotServer::<IpcSender<Message>>::new()
             .expect("Failed to create one shot server");
-        let child = Command::new(path)
+        let _child = Command::new(path)
             .arg(token)
             .spawn()
             .expect("Failed to start window process");
@@ -100,7 +100,7 @@ impl DebugWindow {
     }
 }
 impl DebugRenderBackend for DebugWindow {
-    fn draw_line(&mut self, object: DebugRenderObject, a: Vector, b: Vector, color: DebugColor) {
+    fn draw_line(&mut self, _object: DebugRenderObject, a: Vector, b: Vector, color: DebugColor) {
         self.sender
             .send(Message::Line(DebugLine {
                 point1: (a.x, a.y, a.z),

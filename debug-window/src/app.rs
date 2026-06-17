@@ -33,7 +33,7 @@ impl App {
 }
 impl ApplicationHandler<State> for App {
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        let mut window_attributes = Window::default_attributes();
+        let window_attributes = Window::default_attributes();
 
         let window = Arc::new(event_loop.create_window(window_attributes).unwrap());
 
@@ -41,14 +41,14 @@ impl ApplicationHandler<State> for App {
             Some(pollster::block_on(State::new(window, self.line_receiver.clone())).unwrap());
     }
 
-    fn user_event(&mut self, event_loop: &winit::event_loop::ActiveEventLoop, event: State) {
+    fn user_event(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop, event: State) {
         self.state = Some(event);
     }
 
     fn window_event(
         &mut self,
         event_loop: &winit::event_loop::ActiveEventLoop,
-        window_id: winit::window::WindowId,
+        _window_id: winit::window::WindowId,
         event: winit::event::WindowEvent,
     ) {
         let state = match &mut self.state {

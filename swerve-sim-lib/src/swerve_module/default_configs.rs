@@ -24,7 +24,7 @@ impl SwerveModuleConfig {
         0.0,
     );
 
-    pub const fn get_mk4i(gear_ratio: Mk4iGearRatio, wheel: Mk4iWheel) -> Self {
+    pub const fn get_mk4i(_gear_ratio: Mk4iGearRatio, _wheel: Mk4iWheel) -> Self {
         todo!()
     }
 }

@@ -7,7 +7,7 @@ use rapier3d::{
 };
 use std::time::Duration;
 use swerve_sim_3d::{
-    physics_world::{self, PhysicsWorld},
+    physics_world::PhysicsWorld,
     swerve_module::{
         SwerveModule,
         default_configs::{Mk4iGearRatio, Mk4iWheel, generate_mk4i_swerve_config},
@@ -21,7 +21,7 @@ fn main() {
     let mut drive_base = RigidBodyBuilder::dynamic().build();
     drive_base.set_locked_axes(LockedAxes::all(), false);
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
-    let swerve_module = SwerveModule::new(
+    let _swerve_module = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
             x: 0.0,
