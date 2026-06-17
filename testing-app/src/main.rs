@@ -1,4 +1,4 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, thread};
 
 use rapier3d::{
     dynamics::{LockedAxes, RigidBodyBuilder},
@@ -15,7 +15,7 @@ use swerve_sim_3d::{
 };
 
 fn main() {
-    swerve_sim_3d::util::debug_render::spawn_debug_window();
+    let window = swerve_sim_3d::util::debug_render::spawn_debug_window();
     let mut physics_world = physics_world::PhysicsWorld::default();
     let mut drive_base = RigidBodyBuilder::dynamic().build();
     drive_base.set_locked_axes(LockedAxes::all(), false);
@@ -42,4 +42,7 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
+    loop {
+        thread::sleep(Duration::from_secs(1));
+    }
 }
