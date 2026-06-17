@@ -1,11 +1,7 @@
-use std::{
-    process::Command,
-    thread,
-    time::{Duration, Instant},
-};
+use std::process::Command;
 
-use ipc_channel::ipc::{self, IpcOneShotServer, IpcSender};
-use ipc_types::{DebugLine, Message};
+use ipc_channel::ipc::{IpcOneShotServer, IpcSender};
+use ipc_types::Message;
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     // https://www.baeldung.com/cs/convert-color-hsl-rgb
     let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];

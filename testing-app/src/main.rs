@@ -1,9 +1,9 @@
-use std::{f32::consts::PI, thread};
+use std::thread;
 
 use rapier3d::{
     dynamics::{LockedAxes, RigidBodyBuilder},
     geometry::ColliderBuilder,
-    math::{Pose3, Vec3, Vector},
+    math::{Vec3, Vector},
 };
 use std::time::Duration;
 use swerve_sim_3d::{

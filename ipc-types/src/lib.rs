@@ -1,5 +1,3 @@
-use ipc_channel::ipc::IpcSender;
-
 #[derive(Debug, Clone, Copy, serde::Deserialize, serde::Serialize, PartialEq)]
 pub struct DebugLine {
     pub point1: (f32, f32, f32),

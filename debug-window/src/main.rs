@@ -1,15 +1,14 @@
 use std::collections::VecDeque;
+use std::env;
 use std::rc::Rc;
 use std::result::Result::Ok;
 use std::time::{Duration, Instant};
-use std::{env, process};
 use std::{sync::Arc, vec};
 
+use ipc_channel::ipc;
 use ipc_channel::ipc::{IpcReceiver, IpcSender};
-use ipc_channel::{IpcError, ipc};
 use ipc_types::{DebugLine, Message};
 use wgpu::PowerPreference::LowPower;
-use wgpu::PrimitiveTopology::TriangleList;
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor, BlendState, Buffer,
@@ -663,7 +662,6 @@ impl CameraController {
         use cgmath::InnerSpace;
         let forward = camera.target - camera.eye;
         let forward_norm = forward.normalize();
-        let forward_mag = forward.magnitude();
 
         let right = forward_norm.cross(camera.up).normalize();
 
@@ -693,9 +691,6 @@ impl CameraController {
             camera.eye -= camera.up.normalize() * self.translation_speed;
             camera.target -= camera.up.normalize() * self.translation_speed;
         }
-
-        // Redo radius calc in case the forward/backward is pressed.
-        let forward = camera.target - camera.eye;
 
         if self.is_yaw_right_pressed {
             camera.target = camera.target + right.normalize() * self.rotation_speed;
