@@ -12,6 +12,3 @@ pub enum Message {
     StartTransfer,
     EndTransfer,
 }
-pub struct DebugWindow {
-    pub sender: IpcSender<Message>,
-}

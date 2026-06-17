@@ -4,8 +4,8 @@ use std::{
     time::{Duration, Instant},
 };
 
-use ipc_channel::ipc::{self, IpcOneShotServer, IpcReceiver, IpcSender, channel};
-use ipc_types::{DebugLine, DebugWindow, Message};
+use ipc_channel::ipc::{self, IpcOneShotServer, IpcSender};
+use ipc_types::{DebugLine, Message};
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     // https://www.baeldung.com/cs/convert-color-hsl-rgb
     let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];
@@ -55,25 +55,23 @@ mod hsla_test {
         );
     }
 }
+pub struct DebugWindow {
+    pub sender: IpcSender<Message>,
+}
+impl DebugWindow {
+    pub fn spawn_debug_window() -> Self {
+        let mut path = std::env::current_exe().unwrap();
+        path.pop();
+        path.push("debug-window");
 
-pub fn spawn_debug_window() -> DebugWindow {
-    let mut path = std::env::current_exe().unwrap();
-    path.pop();
-    path.push("debug-window");
+        let (server, token) = IpcOneShotServer::<IpcSender<Message>>::new()
+            .expect("Failed to create one shot server");
+        let child = Command::new(path)
+            .arg(token)
+            .spawn()
+            .expect("Failed to start window process");
+        let (_rx, sender) = server.accept().expect("Accept failed");
 
-    let (server, token) =
-        IpcOneShotServer::<IpcSender<Message>>::new().expect("Failed to create one shot server");
-    let mut child = Command::new(path)
-        .arg(token)
-        .spawn()
-        .expect("Failed to start window process");
-    let (_rx, sender) = server.accept().expect("Accept failed");
-    let start_time = Instant::now();
-    loop {
-        let timer = Instant::now().duration_since(start_time).as_nanos() as f64 / 1000000000.0;
-        sender.send(Message::StartTransfer).expect("msg");
-        sender.send(Message::EndTransfer).expect("msg");
-        thread::sleep(Duration::from_secs_f32(1.0 / 60.0));
+        return DebugWindow { sender };
     }
-    return DebugWindow { sender };
 }
