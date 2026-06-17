@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::rc::Rc;
 use std::result::Result::Ok;
 use std::time::{Duration, Instant};
@@ -139,7 +140,7 @@ pub struct State {
     camera_controller: CameraController,
     camera_bind_group: BindGroup,
     message_receiver: Rc<IpcReceiver<Message>>,
-    message_buffer: Vec<Message>,
+    message_buffer: VecDeque<Message>,
 }
 impl State {
     pub async fn new(
@@ -304,7 +305,7 @@ impl State {
             camera_bind_group,
             camera_controller,
             message_receiver,
-            message_buffer: Vec::new(),
+            message_buffer: VecDeque::new(),
         })
     }
 
@@ -320,6 +321,11 @@ impl State {
         if !self.is_surface_configured {
             return Ok(());
         }
+
+        self.read_all_messages()?;
+        // println!("Message buffer: {:?}", self.message_buffer);
+        let lines = self.get_most_up_to_date_lines_to_draw();
+        self.convert_debug_lines_to_vertex_buffer(lines);
 
         let output = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
@@ -403,10 +409,86 @@ impl State {
         );
     }
 
-    fn read_messages_all(&self) -> anyhow::Result<()> {
-        // let messages = get_all_messages(self.)?;
-
+    fn read_all_messages(&mut self) -> anyhow::Result<()> {
+        loop {
+            match self.message_receiver.try_recv() {
+                Ok(l) => self.message_buffer.push_back(l),
+                Err(e) => match e {
+                    ipc_channel::TryRecvError::IpcError(ipc_error) => {
+                        println!("{}", ipc_error);
+                        return Err(ipc_error.into());
+                    }
+                    ipc_channel::TryRecvError::Empty => break,
+                },
+            }
+        }
         Ok(())
+    }
+
+    fn get_most_up_to_date_lines_to_draw(&mut self) -> Vec<DebugLine> {
+        let last_transfer_end = match self
+            .message_buffer
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|m| *m.1 == Message::EndTransfer)
+        {
+            Some(m) => m,
+            None => return Vec::new(),
+        };
+        let last_transfer_start = match self
+            .message_buffer
+            .iter()
+            .enumerate()
+            .rev()
+            .find(|m| *m.1 == Message::StartTransfer && m.0 < last_transfer_end.0)
+        {
+            Some(m) => m,
+            None => panic!("End without a start"),
+        };
+        let messages: Vec<DebugLine> = self
+            .message_buffer
+            .iter()
+            .enumerate()
+            .filter(|m| m.0 > last_transfer_start.0 && m.0 < last_transfer_end.0)
+            .map(|m| m.1.clone())
+            .map(|m| match m {
+                Message::Line(debug_line) => debug_line,
+                Message::StartTransfer => panic!("Why are there start messages in my lines"),
+                Message::EndTransfer => panic!("Why are there end messages in my lines"),
+            })
+            .collect();
+        self.message_buffer.drain(0..last_transfer_start.0);
+        return messages;
+    }
+    fn convert_debug_lines_to_vertex_buffer(&mut self, lines: Vec<DebugLine>) {
+        if lines.len() == 0 {
+            return;
+        }
+        let vertices: Vec<Vertex> = lines
+            .iter()
+            .flat_map(|line| {
+                [
+                    Vertex {
+                        position: [line.point1.0, line.point1.1, line.point1.2],
+                        color: [line.color.0, line.color.1, line.color.2],
+                    },
+                    Vertex {
+                        position: [line.point2.0, line.point2.1, line.point2.2],
+                        color: [line.color.0, line.color.1, line.color.2],
+                    },
+                ]
+            })
+            .collect();
+        self.vertex_buffer.destroy();
+
+        let vertex_buffer = self.device.create_buffer_init(&BufferInitDescriptor {
+            label: Some("Vertex buffer"),
+            contents: bytemuck::cast_slice(&vertices),
+            usage: BufferUsages::VERTEX,
+        });
+        self.vertex_buffer = vertex_buffer;
+        self.num_vertices = vertices.len() as u32;
     }
 }
 
@@ -654,23 +736,6 @@ pub fn main() {
         ipc::channel().expect("Failed to make channel");
     tx.send(sender).expect("send failed");
 
-    let line = receiver.recv().unwrap();
-    println!("{:?}", line);
-
     _ = run(receiver).expect("Window failed to spawn");
     println!("After close");
-}
-
-fn get_all_messages(line_receiver: &IpcReceiver<Message>) -> anyhow::Result<Vec<Message>> {
-    let mut messages: Vec<Message> = Vec::new();
-    loop {
-        match line_receiver.try_recv() {
-            Ok(l) => messages.push(l),
-            Err(e) => match e {
-                ipc_channel::TryRecvError::IpcError(ipc_error) => return Err(ipc_error.into()),
-                ipc_channel::TryRecvError::Empty => break,
-            },
-        }
-    }
-    return Ok(messages);
 }
