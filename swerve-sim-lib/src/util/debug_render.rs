@@ -1,7 +1,16 @@
 use std::process::Command;
 
 use ipc_channel::ipc::{IpcOneShotServer, IpcSender};
-use ipc_types::Message;
+use ipc_types::{DebugLine, Message};
+use rapier3d::{
+    math::Vector,
+    pipeline::{
+        DebugColor, DebugRenderBackend, DebugRenderMode, DebugRenderObject, DebugRenderPipeline,
+        DebugRenderStyle,
+    },
+};
+
+use crate::physics_world::{self, PhysicsWorld};
 fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     // https://www.baeldung.com/cs/convert-color-hsl-rgb
     let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];
@@ -69,5 +78,35 @@ impl DebugWindow {
         let (_rx, sender) = server.accept().expect("Accept failed");
 
         return DebugWindow { sender };
+    }
+
+    pub fn render(&mut self, physics_world: &PhysicsWorld) {
+        let mut render =
+            DebugRenderPipeline::new(DebugRenderStyle::default(), DebugRenderMode::default());
+        self.sender
+            .send(Message::StartTransfer)
+            .expect("Failed to send start transfer");
+        render.render(
+            self,
+            &physics_world.rigid_body_set,
+            &physics_world.collider_set,
+            &physics_world.impulse_joint_set,
+            &physics_world.multibody_joint_set,
+            &physics_world.narrow_phase,
+        );
+        self.sender
+            .send(Message::EndTransfer)
+            .expect("Failed to send end transfer");
+    }
+}
+impl DebugRenderBackend for DebugWindow {
+    fn draw_line(&mut self, object: DebugRenderObject, a: Vector, b: Vector, color: DebugColor) {
+        self.sender
+            .send(Message::Line(DebugLine {
+                point1: (a.x, a.y, a.z),
+                point2: (b.x, b.y, b.z),
+                color: convert_hsla_to_rgb(color),
+            }))
+            .expect("Line failed to send");
     }
 }

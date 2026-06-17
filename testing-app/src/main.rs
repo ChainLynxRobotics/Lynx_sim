@@ -15,7 +15,7 @@ use swerve_sim_3d::{
 };
 
 fn main() {
-    let window = swerve_sim_3d::util::debug_render::DebugWindow::spawn_debug_window();
+    let mut window = swerve_sim_3d::util::debug_render::DebugWindow::spawn_debug_window();
     let mut physics_world = physics_world::PhysicsWorld::default();
     let mut drive_base = RigidBodyBuilder::dynamic().build();
     drive_base.set_locked_axes(LockedAxes::all(), false);
@@ -43,6 +43,8 @@ fn main() {
         &mut physics_world.rigid_body_set,
     );
     loop {
-        thread::sleep(Duration::from_secs(1));
+        window.render(&physics_world);
+        thread::sleep(Duration::from_secs_f32(1.0 / 30.0));
+        physics_world.step();
     }
 }
