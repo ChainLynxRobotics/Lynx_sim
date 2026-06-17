@@ -44,7 +44,7 @@ fn main() {
     );
     loop {
         window.render(&physics_world);
-        thread::sleep(Duration::from_secs_f32(1.0 / 30.0));
+        thread::sleep(Duration::from_secs_f32(1.0 / 50.0));
         physics_world.step();
     }
 }
