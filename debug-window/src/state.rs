@@ -207,7 +207,6 @@ impl State {
         }
 
         self.read_all_messages()?;
-        // println!("Message buffer: {:?}", self.message_buffer);
         let lines = self.get_most_up_to_date_lines_to_draw();
         self.convert_debug_lines_to_vertex_buffer(lines);
 
