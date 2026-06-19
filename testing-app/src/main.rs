@@ -18,8 +18,7 @@ use swerve_sim_3d::{
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::default();
-    let mut drive_base = RigidBodyBuilder::dynamic().build();
-    drive_base.set_locked_axes(LockedAxes::all(), false);
+    let drive_base = RigidBodyBuilder::dynamic().build();
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
     let _swerve_module = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
