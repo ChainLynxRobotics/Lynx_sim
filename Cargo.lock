@@ -2488,6 +2488,7 @@ version = "0.1.0"
 dependencies = [
  "rapier3d",
  "swerve-sim-3d",
+ "whippyunits",
 ]
 
 [[package]]
@@ -3088,9 +3089,9 @@ dependencies = [
 
 [[package]]
 name = "whippyunits"
-version = "0.1.2"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e079cf5909047b63844888f59c32c264f94c4fca4775762a9a805e0489dc8be"
+checksum = "9d60b7977a1048eb6f7f4044cfde0e089fd682a9bcde629465c81e1d1c22bdbe"
 dependencies = [
  "culit",
  "libm",
@@ -3107,19 +3108,20 @@ dependencies = [
 
 [[package]]
 name = "whippyunits-core"
-version = "0.1.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9d3417419f7cde21c895bb9fea358fe89c9aeb445871eefb75fd32afcc6f8de"
+checksum = "9c58a73e0a91c30fc0534ef7a00f95acce704410623e8f6d6132454d87d7bce9"
 dependencies = [
  "proc-macro2",
  "syn",
+ "typenum",
 ]
 
 [[package]]
 name = "whippyunits-proc-macros"
-version = "0.1.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "639928addc0adbdbd22978e8cb404784b0aeaa1478cea36c00a2a62fc7aca20b"
+checksum = "617ea033a8475c9b295829f28e2842850e38bd1491c2840540a14a559cf5273f"
 dependencies = [
  "proc-macro2",
  "quote",
