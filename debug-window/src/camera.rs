@@ -28,8 +28,8 @@ impl Camera {
 impl Camera {
     pub fn new(width: u32, height: u32) -> Self {
         Camera {
-            eye: (0.0, 0.0, 0.0).into(),
-            target: (1.0, 0.0, 0.0).into(),
+            eye: (0.0, 0.0, -1.0).into(),
+            target: (1.0, 0.0, -1.0).into(),
             up: cgmath::Vector3::unit_z(),
             asspect: (width as f32) / (height as f32),
             fovy: 45.0,

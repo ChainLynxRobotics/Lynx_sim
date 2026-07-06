@@ -33,8 +33,8 @@ fn main() {
     let _swerve_module = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
-            x: 0.75,
-            y: 0.75,
+            x: 0.0,
+            y: 0.0,
             z: 0.0,
         },
         drive_base,
