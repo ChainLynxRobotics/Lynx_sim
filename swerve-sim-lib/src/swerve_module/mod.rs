@@ -111,7 +111,7 @@ impl SwerveModule {
             .expect("Failed to insert joint");
         return SwerveModule {
             config,
-            wheel_handle: azumith,
+            wheel_handle: wheel,
             azumith_handle: azumith,
         };
     }
