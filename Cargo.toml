@@ -1,7 +1,7 @@
 cargo-features = ["profile-rustflags"]
 [workspace]
 resolver = "3"
-members = ["debug-window","ipc-types","swerve-sim-lib", "testing-app"]
+members = ["debug-window", "ipc-types", "swerve-sim-lib", "testing-app"]
 
 [patch.crates-io]
 simba = { git = "https://github.com/aabizri/simba/", branch = "wip-nightly-1.95" }
