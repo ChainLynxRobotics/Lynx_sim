@@ -65,7 +65,7 @@ impl Mk4iGearRatio {
         let azumith_moi = quantity!(0.000763062857, kg * m ^ 2, f32);
         let azumith_secondary_moi = quantity!(0.0004489, kg * m ^ 2, f32);
         let azumith_mass = quantity!(0.41940695, kg, f32);
-        let azumith_center_height = quantity!(0.013541, m, f32);
+        let azumith_center_height = quantity!(0.061, m, f32);
         let azumith_thickness = quantity!(0.02708200, m, f32);
         let azumith_radius = quantity!(0.0492125, m, f32);
 

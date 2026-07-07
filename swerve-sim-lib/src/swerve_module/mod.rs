@@ -11,6 +11,8 @@ use rapier3d::{
 };
 use whippyunits::value;
 
+use crate::ROBOT_INTERACTION_GROUPS;
+
 use self::config::SwerveModuleConfig;
 
 pub mod config;
@@ -32,33 +34,29 @@ impl SwerveModule {
         collider_set: &mut ColliderSet,
         joint_set: &mut MultibodyJointSet,
     ) -> Self {
-        // let wheel = RigidBodyBuilder::dynamic()
-        //     .translation(
-        //         module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
-        //     )
-        //     .ccd_enabled(true)
-        //     .build();
-        // let wheel_colider = ColliderBuilder::cylinder(
-        //     value!(config.wheel_width, m, f32) / 2.0,
-        //     value!(config.wheel_radius, m, f32),
-        // )
-        // // .friction(config.wheel_cof)
-        // // .restitution(config.wheel_coefficient_of_restetution)
-        // // .mass_properties(MassProperties::new(
-        // //     Vec3::ZERO,
-        // //     value!(config.wheel_mass, kg, f32),
-        // //     Vec3::new(
-        // //         value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
-        // //         value!(config.drive_moi, kg * m ^ 2, f32),
-        // //         value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
-        // //     ),
-        // // ))
-        // .collision_groups(InteractionGroups::new(
-        //     Group::GROUP_2,
-        //     Group::GROUP_1,
-        //     rapier3d::geometry::InteractionTestMode::Or,
-        // ))
-        // .build();
+        let wheel = RigidBodyBuilder::dynamic()
+            .translation(
+                module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+            )
+            .ccd_enabled(true)
+            .build();
+        let wheel_colider = ColliderBuilder::cylinder(
+            value!(config.wheel_width, m, f32) / 2.0,
+            value!(config.wheel_radius, m, f32),
+        )
+        .friction(config.wheel_cof)
+        .restitution(config.wheel_coefficient_of_restetution)
+        .mass_properties(MassProperties::new(
+            Vec3::ZERO,
+            value!(config.wheel_mass, kg, f32),
+            Vec3::new(
+                value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
+                value!(config.drive_moi, kg * m ^ 2, f32),
+                value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
+            ),
+        ))
+        .collision_groups(ROBOT_INTERACTION_GROUPS)
+        .build();
 
         let azumith = RigidBodyBuilder::dynamic()
             .translation(
@@ -70,7 +68,6 @@ impl SwerveModule {
             value!(config.azumith_thickness, m, f32) / 2.0,
             value!(config.azumith_radius, m, f32),
         )
-        // .mass(52.16)
         .mass_properties(MassProperties::new(
             Vec3::ZERO,
             value!(config.azumith_mass, kg, f32),
@@ -80,27 +77,25 @@ impl SwerveModule {
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
-        .collision_groups(InteractionGroups::new(
-            Group::GROUP_2,
-            Group::GROUP_1,
-            rapier3d::geometry::InteractionTestMode::Or,
-        ))
+        .collision_groups(ROBOT_INTERACTION_GROUPS)
         .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
         .restitution(0.0)
         .build();
 
-        // let wheel = rigid_body_set.insert(wheel);
+        let wheel = rigid_body_set.insert(wheel);
         let azumith = rigid_body_set.insert(azumith);
 
-        // collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
+        collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
         collider_set.insert_with_parent(azumith_colider, azumith, rigid_body_set);
 
-        // let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
-        //     .local_anchor1(Vec3::ZERO)
-        //     .local_anchor2(
-        //         module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
-        //     )
-        //     .build();
+        let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
+            .local_anchor1(Vec3::ZERO)
+            .local_anchor2(Vec3::new(
+                0.0,
+                0.0,
+                value!(-config.wheel_center_height, m, f32),
+            ))
+            .build();
         let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
@@ -108,8 +103,12 @@ impl SwerveModule {
             )
             .build();
 
-        // joint_set.insert(wheel, azumith, wheel_joint, true);
-        joint_set.insert(azumith, drive_base_handle, azumith_joint, true);
+        joint_set
+            .insert(azumith, wheel, wheel_joint, true)
+            .expect("Failed to insert joint");
+        joint_set
+            .insert(drive_base_handle, azumith, azumith_joint, true)
+            .expect("Failed to insert joint");
         return SwerveModule {
             config,
             wheel_handle: azumith,
