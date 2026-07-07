@@ -3,9 +3,6 @@ cargo-features = ["profile-rustflags"]
 resolver = "3"
 members = ["debug-window", "ipc-types", "swerve-sim-lib", "testing-app"]
 
-[patch.crates-io]
-simba = { git = "https://github.com/aabizri/simba/", branch = "wip-nightly-1.95" }
-
 [profile.release]
 # rustflags = ["-C target-cpu=x86-64-v3"]
 lto = "thin"

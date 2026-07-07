@@ -6,7 +6,7 @@ edition = "2024"
 [dependencies]
 culit = "0.6.7"
 ipc-channel = "0.22.0"
-rapier3d = { version = "0.32.0", features = ["simd-nightly", "debug-render"] }
+rapier3d = { version = "0.34.0", features = ["simd-nightly", "debug-render"] }
 serde = "1.0.228"
 whippyunits = "0.2.2"
 ipc-types = { path = "../ipc-types" }
