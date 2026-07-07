@@ -1,12 +1,10 @@
-use std::thread;
-use whippyunits::{quantity, value};
+use whippyunits::quantity;
 
 use rapier3d::{
-    dynamics::{LockedAxes, RigidBodyBuilder},
+    dynamics::RigidBodyBuilder,
     geometry::{ColliderBuilder, Group, InteractionGroups, InteractionTestMode::Or},
     math::{Vec3, Vector},
 };
-use std::time::Duration;
 use swerve_sim_3d::{
     physics_world::PhysicsWorld,
     swerve_module::{

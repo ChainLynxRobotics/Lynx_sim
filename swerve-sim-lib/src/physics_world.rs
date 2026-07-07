@@ -1,5 +1,4 @@
 use rapier3d::{
-    dynamics::SpringCoefficients,
     math::Vec3,
     prelude::{
         BroadPhaseBvh, CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet,
