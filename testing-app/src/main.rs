@@ -1,4 +1,7 @@
-use std::{thread, time::Duration};
+use std::{
+    thread,
+    time::{Duration, Instant},
+};
 
 use whippyunits::quantity;
 
@@ -96,8 +99,14 @@ fn main() {
         &mut physics_world.rigid_body_set,
     );
     loop {
-        window.render(&physics_world);
-        thread::sleep(Duration::from_secs_f32(1.0 / 10.0));
+        let start_time = Instant::now();
         physics_world.step();
+        window.render(&physics_world);
+        let processing_time = start_time.elapsed();
+        println!("processing time: {:?}", processing_time);
+        if processing_time <= Duration::from_secs_f32(1.0 / 250.0) {
+            thread::sleep(Duration::from_secs_f32(1.0 / 250.0) - processing_time);
+        }
+        println!("total time: {:?}", start_time.elapsed());
     }
 }
