@@ -7,7 +7,7 @@ use whippyunits::quantity;
 
 use rapier3d::{
     dynamics::RigidBodyBuilder,
-    geometry::{ColliderBuilder, Group, InteractionGroups, InteractionTestMode::Or},
+    geometry::ColliderBuilder,
     math::{Vec3, Vector},
 };
 use swerve_sim_3d::{
