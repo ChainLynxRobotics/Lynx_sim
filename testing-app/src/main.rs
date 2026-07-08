@@ -3,7 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use whippyunits::quantity;
+use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
     dynamics::RigidBodyBuilder,
@@ -19,6 +19,9 @@ use swerve_sim_3d::{
     },
     util::debug_render::DebugWindow,
 };
+pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(50.0, Hz, f32);
+pub const SIMULATION_TIMESTEP: unit!(s, f32) =
+    quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
 
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
@@ -103,10 +106,11 @@ fn main() {
         physics_world.step();
         window.render(&physics_world);
         let processing_time = start_time.elapsed();
-        println!("processing time: {:?}", processing_time);
-        if processing_time <= Duration::from_secs_f32(1.0 / 250.0) {
-            thread::sleep(Duration::from_secs_f32(1.0 / 250.0) - processing_time);
+        println!("{:?}", processing_time);
+        if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
+            thread::sleep(
+                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
+            );
         }
-        println!("total time: {:?}", start_time.elapsed());
     }
 }
