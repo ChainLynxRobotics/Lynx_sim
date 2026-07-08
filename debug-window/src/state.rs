@@ -171,7 +171,7 @@ impl State {
 
         let num_vertices = VERTICES.len() as u32;
 
-        let camera_controller = CameraController::new(0.2, 0.05);
+        let camera_controller = CameraController::new(0.05, 0.01);
 
         Ok(Self {
             surface,
