@@ -101,6 +101,54 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
+    // physics_world
+    //     .rigid_body_set
+    //     .get_mut(swerve_module1.wheel_handle)
+    //     .expect("wheel doesnt exist")
+    //     .add_torque(
+    //         Vec3 {
+    //             x: 0.0,
+    //             y: 10.0,
+    //             z: 0.0,
+    //         },
+    //         true,
+    //     );
+    // physics_world
+    //     .rigid_body_set
+    //     .get_mut(swerve_module2.wheel_handle)
+    //     .expect("wheel doesnt exist")
+    //     .add_torque(
+    //         Vec3 {
+    //             x: 0.0,
+    //             y: 10.0,
+    //             z: 0.0,
+    //         },
+    //         true,
+    //     );
+    // physics_world
+    //     .rigid_body_set
+    //     .get_mut(swerve_module3.wheel_handle)
+    //     .expect("wheel doesnt exist")
+    //     .add_torque(
+    //         Vec3 {
+    //             x: 0.0,
+    //             y: 10.0,
+    //             z: 0.0,
+    //         },
+    //         true,
+    //     );
+    // physics_world
+    //     .rigid_body_set
+    //     .get_mut(swerve_module4.wheel_handle)
+    //     .expect("wheel doesnt exist")
+    //     .add_torque(
+    //         Vec3 {
+    //             x: 0.0,
+    //             y: 10.0,
+    //             z: 0.0,
+    //         },
+    //         true,
+    //     );
     loop {
         let start_time = Instant::now();
         physics_world.step();
