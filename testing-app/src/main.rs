@@ -25,8 +25,11 @@ pub const SIMULATION_TIMESTEP: unit!(s, f32) =
 
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
-    let mut physics_world = PhysicsWorld::new(quantity!(1.0, s, f32) / 100.0);
-    let drive_base = RigidBodyBuilder::dynamic().build();
+    let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
+    let drive_base = RigidBodyBuilder::dynamic()
+        .linear_damping(0.1)
+        .angular_damping(0.05)
+        .build();
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
     // 17.25 in
     let drive_base_colider = ColliderBuilder::cuboid(0.44, 0.44, 0.055)
