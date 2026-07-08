@@ -6,16 +6,35 @@
 use whippyunits::{quantity, unit};
 
 struct Motor {
-    pub nominal_voltage: f32,
-    pub stall_torque: f32,
-    pub stall_current: f32,
-    pub free_current: f32,
-    pub free_speed: f32,
+    pub nominal_voltage: unit!(volt, f32),
+    pub stall_torque: unit!(newton / m, f32),
+    pub stall_current: unit!(ampere, f32),
+    pub free_current: unit!(ampere, f32),
+    pub free_speed: unit!(rad / s, f32),
     pub internal_resistance: unit!(ohm, f32),
     pub kv: unit!((rad / s) / volt, f32),
     pub kt: unit!((newton / m) / ampere, f32),
 }
 impl Motor {
+    fn new(
+        nominal_voltage: unit!(volt, f32),
+        stall_torque: unit!(newton / m, f32),
+        stall_current: unit!(ampere, f32),
+        free_current: unit!(ampere, f32),
+        free_speed: unit!(rad / s, f32),
+    ) -> Self {
+        let internal_resistance = nominal_voltage / stall_current;
+        Self {
+            nominal_voltage,
+            stall_torque,
+            stall_current,
+            free_current,
+            free_speed,
+            internal_resistance,
+            kv: free_speed / (nominal_voltage - (internal_resistance * free_current)),
+            kt: stall_torque / stall_current,
+        }
+    }
     /// Calculate current drawn by motor with given velocity and input voltage.
     ///
     /// # Parameters
