@@ -27,9 +27,11 @@ impl PhysicsWorld {
     pub fn new(dt: unit!(s, f32)) -> PhysicsWorld {
         let mut integration_parameters = IntegrationParameters::default();
         integration_parameters.dt = value!(dt, s, f32);
-        // integration_parameters.num_solver_iterations = 64;
-        // integration_parameters.num_internal_stabilization_iterations = 16;
-        // integration_parameters.normalized_max_corrective_velocity = 1.0;
+        integration_parameters.num_internal_pgs_iterations = 2;
+        integration_parameters.num_solver_iterations = 8;
+        integration_parameters.num_internal_stabilization_iterations = 2;
+        integration_parameters.normalized_allowed_linear_error = 0.1;
+        integration_parameters.normalized_max_corrective_velocity = 0.001;
 
         return PhysicsWorld {
             physics_pipeline: PhysicsPipeline::new(),
