@@ -40,7 +40,7 @@ fn main() {
         &mut physics_world.rigid_body_set,
     );
     // 6.375 in from edge
-    let _swerve_module1 = SwerveModule::new(
+    let swerve_module1 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
             x: 0.28,
@@ -52,7 +52,7 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.multibody_joint_set,
     );
-    let _swerve_module2 = SwerveModule::new(
+    let swerve_module2 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
             x: -0.28,
@@ -64,7 +64,7 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.multibody_joint_set,
     );
-    let _swerve_module3 = SwerveModule::new(
+    let swerve_module3 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
             x: 0.28,
@@ -76,7 +76,7 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.multibody_joint_set,
     );
-    let _swerve_module4 = SwerveModule::new(
+    let swerve_module4 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
             x: -0.28,
