@@ -39,7 +39,10 @@ impl SwerveModule {
             .translation(
                 module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             )
+            .clone()
             .ccd_enabled(true)
+            .soft_ccd_prediction(0.05)
+            // .angular_damping(1.5)
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
             value!(config.wheel_width, m, f32) / 2.0,
@@ -63,7 +66,7 @@ impl SwerveModule {
             .translation(
                 module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
-            .ccd_enabled(true)
+            // .angular_damping(0.5)
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
             value!(config.azumith_thickness, m, f32) / 2.0,
