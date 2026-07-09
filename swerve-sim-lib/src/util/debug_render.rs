@@ -67,6 +67,9 @@ impl DebugWindow {
     pub fn spawn_debug_window() -> Self {
         let mut path = std::env::current_exe().unwrap();
         path.pop();
+        #[cfg(target_os = "windows")]
+        path.push("debug-window.exe");
+        #[cfg(not(target_os = "windows"))]
         path.push("debug-window");
 
         let (server, token) = IpcOneShotServer::<IpcSender<Message>>::new()
