@@ -49,15 +49,8 @@ fn main() {
         .insert(rb1, rb2, joint, true);
 
     loop {
-        let start_time = Instant::now();
         physics_world.step();
         window.render(&physics_world);
-        let processing_time = start_time.elapsed();
         thread::sleep(Duration::from_secs_f32(0.1));
-        if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
-            thread::sleep(
-                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
-            );
-        }
     }
 }
