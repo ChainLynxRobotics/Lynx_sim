@@ -8,6 +8,9 @@ members = ["debug-window", "ipc-types", "swerve-sim-lib", "testing-app"]
 lto = "thin"
 debug = true
 
+[patch.crates-io]
+rapier3d = { path = "../../other/rapier3d" }
+
 [profile.release-full]
 inherits = "release"
 opt-level = 3
