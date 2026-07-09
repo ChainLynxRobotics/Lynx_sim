@@ -40,7 +40,7 @@ fn main() {
         &mut physics_world.rigid_body_set,
     );
     let rb = RigidBodyBuilder::dynamic().build();
-    let collider = ColliderBuilder::cylinder(0.02708200 / 2.0, 0.0492125).build();
+    let collider = ColliderBuilder::cylinder(1.0, 1.0).build();
     let rb = physics_world.rigid_body_set.insert(rb);
     physics_world
         .collider_set
