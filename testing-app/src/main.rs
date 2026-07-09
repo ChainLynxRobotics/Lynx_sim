@@ -18,19 +18,21 @@ pub const SIMULATION_TIMESTEP: unit!(s, f32) =
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
+
     let rb1 = RigidBodyBuilder::dynamic().build();
     let rb1 = physics_world.rigid_body_set.insert(rb1);
 
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
-    let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0).build();
     let ground = physics_world.rigid_body_set.insert(ground);
+    let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0).build();
     physics_world.collider_set.insert_with_parent(
         ground_colider,
         ground,
         &mut physics_world.rigid_body_set,
     );
+
     let rb2 = RigidBodyBuilder::dynamic().build();
     let rb2 = physics_world.rigid_body_set.insert(rb2);
     let collider = ColliderBuilder::ball(1.0).build();
