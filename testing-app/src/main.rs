@@ -27,18 +27,12 @@ pub const SIMULATION_TIMESTEP: unit!(s, f32) =
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
-    let drive_base = RigidBodyBuilder::dynamic()
-        .linear_damping(0.1)
-        .angular_damping(0.05)
-        .build();
+    let drive_base = RigidBodyBuilder::dynamic().build();
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
-    let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0)
-        .collision_groups(FIELD_INTERACTION_GROUPS)
-        .restitution(0.0)
-        .build();
+    let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0).build();
     let ground = physics_world.rigid_body_set.insert(ground);
     physics_world.collider_set.insert_with_parent(
         ground_colider,
@@ -46,15 +40,7 @@ fn main() {
         &mut physics_world.rigid_body_set,
     );
     let rb = RigidBodyBuilder::dynamic().build();
-    let collider = ColliderBuilder::cylinder(0.02708200 / 2.0, 0.0492125)
-        .mass_properties(MassProperties::new(
-            Vec3::ZERO,
-            0.41940695,
-            Vec3::new(0.0004489, 0.000763062857, 0.0004489),
-        ))
-        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
-        .restitution(0.0)
-        .build();
+    let collider = ColliderBuilder::cylinder(0.02708200 / 2.0, 0.0492125).build();
     let rb = physics_world.rigid_body_set.insert(rb);
     physics_world
         .collider_set
