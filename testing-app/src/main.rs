@@ -1,5 +1,4 @@
 use std::{
-    f32::consts::PI,
     thread,
     time::{Duration, Instant},
 };
@@ -7,19 +6,11 @@ use std::{
 use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
-    dynamics::{FixedJoint, FixedJointBuilder, MassProperties, RigidBodyBuilder},
+    dynamics::{FixedJointBuilder, RigidBodyBuilder},
     geometry::ColliderBuilder,
     math::{Vec3, Vector},
 };
-use swerve_sim_3d::{
-    FIELD_INTERACTION_GROUPS, ROBOT_INTERACTION_GROUPS,
-    physics_world::PhysicsWorld,
-    swerve_module::{
-        SwerveModule,
-        default_configs::{Mk4iGearRatio, Mk4iWheel, generate_mk4i_swerve_config},
-    },
-    util::debug_render::DebugWindow,
-};
+use swerve_sim_3d::{physics_world::PhysicsWorld, util::debug_render::DebugWindow};
 pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(50.0, Hz, f32);
 pub const SIMULATION_TIMESTEP: unit!(s, f32) =
     quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
