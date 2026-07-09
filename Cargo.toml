@@ -9,7 +9,7 @@ lto = "thin"
 debug = true
 
 [patch.crates-io]
-rapier3d = { path = "../../other/rapier3d" }
+rapier3d = { path = "../../other/rapier/crates/rapier3d" }
 
 [profile.release-full]
 inherits = "release"
