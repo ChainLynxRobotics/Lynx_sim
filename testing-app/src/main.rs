@@ -18,8 +18,9 @@ pub const SIMULATION_TIMESTEP: unit!(s, f32) =
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
-    let drive_base = RigidBodyBuilder::dynamic().build();
-    let drive_base = physics_world.rigid_body_set.insert(drive_base);
+    let rb1 = RigidBodyBuilder::dynamic().build();
+    let rb1 = physics_world.rigid_body_set.insert(rb1);
+
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
@@ -30,12 +31,12 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
-    let rb = RigidBodyBuilder::dynamic().build();
-    let collider = ColliderBuilder::cylinder(1.0, 1.0).build();
-    let rb = physics_world.rigid_body_set.insert(rb);
+    let rb2 = RigidBodyBuilder::dynamic().build();
+    let rb2 = physics_world.rigid_body_set.insert(rb2);
+    let collider = ColliderBuilder::ball(1.0).build();
     physics_world
         .collider_set
-        .insert_with_parent(collider, rb, &mut physics_world.rigid_body_set);
+        .insert_with_parent(collider, rb2, &mut physics_world.rigid_body_set);
 
     let joint = FixedJointBuilder::new()
         .local_anchor1(Vec3::ZERO)
@@ -43,7 +44,7 @@ fn main() {
         .build();
     physics_world
         .multibody_joint_set
-        .insert(drive_base, rb, joint, true);
+        .insert(rb1, rb2, joint, true);
 
     loop {
         let start_time = Instant::now();
