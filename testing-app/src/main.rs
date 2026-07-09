@@ -1,4 +1,5 @@
 use std::{
+    f32::consts::PI,
     thread,
     time::{Duration, Instant},
 };
@@ -6,7 +7,7 @@ use std::{
 use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
-    dynamics::RigidBodyBuilder,
+    dynamics::{FixedJoint, FixedJointBuilder, MassProperties, RigidBodyBuilder},
     geometry::ColliderBuilder,
     math::{Vec3, Vector},
 };
@@ -31,66 +32,6 @@ fn main() {
         .angular_damping(0.05)
         .build();
     let drive_base = physics_world.rigid_body_set.insert(drive_base);
-    // 17.25 in
-    let drive_base_colider = ColliderBuilder::cuboid(0.44, 0.44, 0.055)
-        .collision_groups(ROBOT_INTERACTION_GROUPS)
-        .restitution(0.0)
-        .mass(50.0)
-        .build();
-    physics_world.collider_set.insert_with_parent(
-        drive_base_colider,
-        drive_base,
-        &mut physics_world.rigid_body_set,
-    );
-    // 6.375 in from edge
-    let swerve_module1 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: 0.28,
-            y: 0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
-    );
-    let swerve_module2 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: 0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
-    );
-    let swerve_module3 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: 0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
-    );
-    let swerve_module4 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
-    );
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
@@ -104,60 +45,36 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module1.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module2.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module3.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module4.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
+    let rb = RigidBodyBuilder::dynamic().build();
+    let collider = ColliderBuilder::cylinder(0.02708200 / 2.0, 0.0492125)
+        .mass_properties(MassProperties::new(
+            Vec3::ZERO,
+            0.41940695,
+            Vec3::new(0.0004489, 0.000763062857, 0.0004489),
+        ))
+        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
+        .restitution(0.0)
+        .build();
+    let rb = physics_world.rigid_body_set.insert(rb);
+    physics_world
+        .collider_set
+        .insert_with_parent(collider, rb, &mut physics_world.rigid_body_set);
+
+    let joint = FixedJointBuilder::new()
+        .local_anchor1(Vec3::ZERO)
+        .local_anchor2(Vec3::ZERO)
+        .build();
+    physics_world
+        .multibody_joint_set
+        .insert(drive_base, rb, joint, true);
+
     loop {
         let start_time = Instant::now();
         physics_world.step();
         window.render(&physics_world);
         let processing_time = start_time.elapsed();
         println!("{:?}", processing_time);
+        thread::sleep(Duration::from_secs_f32(0.1));
         if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
             thread::sleep(
                 Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
