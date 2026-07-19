@@ -6,7 +6,7 @@ use std::{
 use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
-    dynamics::RigidBodyBuilder,
+    dynamics::{FixedJointBuilder, RigidBodyBuilder},
     geometry::ColliderBuilder,
     math::{Vec3, Vector},
 };
@@ -34,11 +34,11 @@ fn main() {
         .restitution(0.0)
         .mass(50.0)
         .build();
-    // physics_world.collider_set.insert_with_parent(
-    //     drive_base_colider,
-    //     drive_base,
-    //     &mut physics_world.rigid_body_set,
-    // );
+    physics_world.collider_set.insert_with_parent(
+        drive_base_colider,
+        drive_base,
+        &mut physics_world.rigid_body_set,
+    );
     // 6.375 in from edge
     let swerve_module1 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
@@ -52,42 +52,54 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.impulse_joint_set,
     );
-    // let swerve_module2 = SwerveModule::new(
-    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-    //     Vec3 {
-    //         x: -0.28,
-    //         y: 0.28,
-    //         z: -0.055,
-    //     },
-    //     drive_base,
-    //     &mut physics_world.rigid_body_set,
-    //     &mut physics_world.collider_set,
-    //     &mut physics_world.impulse_joint_set,
-    // );
-    // let swerve_module3 = SwerveModule::new(
-    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-    //     Vec3 {
-    //         x: 0.28,
-    //         y: -0.28,
-    //         z: -0.055,
-    //     },
-    //     drive_base,
-    //     &mut physics_world.rigid_body_set,
-    //     &mut physics_world.collider_set,
-    //     &mut physics_world.impulse_joint_set,
-    // );
-    // let swerve_module4 = SwerveModule::new(
-    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-    //     Vec3 {
-    //         x: -0.28,
-    //         y: -0.28,
-    //         z: -0.055,
-    //     },
-    //     drive_base,
-    //     &mut physics_world.rigid_body_set,
-    //     &mut physics_world.collider_set,
-    //     &mut physics_world.impulse_joint_set,
-    // );
+    physics_world
+        .rigid_body_set
+        .get_mut(swerve_module1.azumith_handle)
+        .unwrap()
+        .add_torque(
+            Vec3 {
+                x: 0.0,
+                y: 0.0,
+                z: 0.1,
+            },
+            true,
+        );
+    let swerve_module2 = SwerveModule::new(
+        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+        Vec3 {
+            x: -0.28,
+            y: 0.28,
+            z: -0.055,
+        },
+        drive_base,
+        &mut physics_world.rigid_body_set,
+        &mut physics_world.collider_set,
+        &mut physics_world.impulse_joint_set,
+    );
+    let swerve_module3 = SwerveModule::new(
+        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+        Vec3 {
+            x: 0.28,
+            y: -0.28,
+            z: -0.055,
+        },
+        drive_base,
+        &mut physics_world.rigid_body_set,
+        &mut physics_world.collider_set,
+        &mut physics_world.impulse_joint_set,
+    );
+    let swerve_module4 = SwerveModule::new(
+        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+        Vec3 {
+            x: -0.28,
+            y: -0.28,
+            z: -0.055,
+        },
+        drive_base,
+        &mut physics_world.rigid_body_set,
+        &mut physics_world.collider_set,
+        &mut physics_world.impulse_joint_set,
+    );
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
@@ -156,6 +168,7 @@ fn main() {
         let processing_time = start_time.elapsed();
         println!("{:?}", processing_time);
         if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
+            // thread::sleep(Duration::from_secs_f32(0.2));
             thread::sleep(
                 Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
             );

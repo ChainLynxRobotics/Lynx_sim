@@ -64,7 +64,6 @@ impl SwerveModule {
             .translation(
                 module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
-            // .angular_damping(0.5)
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
             value!(config.azumith_thickness, m, f32) / 2.0,
@@ -90,49 +89,23 @@ impl SwerveModule {
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
         collider_set.insert_with_parent(azumith_colider, azumith, rigid_body_set);
 
-        let azumith_rotation_body = RigidBodyBuilder::dynamic().build();
-        let azumith_rotation_body = rigid_body_set.insert(azumith_rotation_body);
-        let azumith_rotation_joint = FixedJointBuilder::new()
+        let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(
                 module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
-        let wheel_rotation_body = RigidBodyBuilder::dynamic().build();
-        let wheel_rotation_body = rigid_body_set.insert(wheel_rotation_body);
-        let wheel_rotation_joint = FixedJointBuilder::new()
+        joint_set.insert(azumith, drive_base_handle, azumith_joint, true);
+        let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
             .local_anchor1(Vec3::ZERO)
             .local_anchor2(Vec3::new(
                 0.0,
                 0.0,
-                value!(-config.wheel_center_height, m, f32),
+                value!(config.wheel_center_height, m, f32),
             ))
             .build();
+        joint_set.insert(wheel, azumith, wheel_joint, true);
 
-        joint_set.insert(
-            drive_base_handle,
-            azumith_rotation_body,
-            azumith_rotation_joint,
-            true,
-        );
-        joint_set.insert(
-            azumith_rotation_body,
-            wheel_rotation_body,
-            wheel_rotation_joint,
-            true,
-        );
-
-        let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
-            .local_anchor1(Vec3::ZERO)
-            .local_anchor2(Vec3::ZERO)
-            .build();
-        let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
-            .local_anchor1(Vec3::ZERO)
-            .local_anchor2(Vec3::ZERO)
-            .build();
-
-        joint_set.insert(wheel_rotation_body, wheel, wheel_joint, true);
-        joint_set.insert(azumith_rotation_body, azumith, azumith_joint, true);
         return SwerveModule {
             config,
             wheel_handle: wheel,
