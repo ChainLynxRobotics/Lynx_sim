@@ -19,7 +19,7 @@ use swerve_sim_3d::{
     },
     util::debug_render::DebugWindow,
 };
-pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(50.0, Hz, f32);
+pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(500.0, Hz, f32);
 pub const SIMULATION_TIMESTEP: unit!(s, f32) =
     quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
 
