@@ -49,28 +49,28 @@ mod test {
         println!("{}", swerve_module.config.wheel_secondary_moi);
         let azumith = physics_world
             .rigid_body_set
-            .get_mut(swerve_module.azumith_handle)
+            .get_mut(swerve_module.azumith)
             .unwrap();
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());
         physics_world.step();
         let azumith = physics_world
             .rigid_body_set
-            .get_mut(swerve_module.azumith_handle)
+            .get_mut(swerve_module.azumith)
             .unwrap();
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());
         physics_world.step();
         let azumith = physics_world
             .rigid_body_set
-            .get_mut(swerve_module.azumith_handle)
+            .get_mut(swerve_module.azumith)
             .unwrap();
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());
         physics_world.step();
         let azumith = physics_world
             .rigid_body_set
-            .get_mut(swerve_module.azumith_handle)
+            .get_mut(swerve_module.azumith)
             .unwrap();
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());
@@ -85,7 +85,7 @@ mod test {
         physics_world.step();
         let azumith = physics_world
             .rigid_body_set
-            .get_mut(swerve_module.azumith_handle)
+            .get_mut(swerve_module.azumith)
             .unwrap();
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());

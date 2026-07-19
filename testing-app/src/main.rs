@@ -54,7 +54,7 @@ fn main() {
     );
     physics_world
         .rigid_body_set
-        .get_mut(swerve_module1.azumith_handle)
+        .get_mut(swerve_module1.azumith)
         .unwrap()
         .add_torque(
             Vec3 {
