@@ -161,12 +161,18 @@ fn main() {
     //         },
     //         true,
     //     );
+    let mut tracking = 0;
     loop {
         let start_time = Instant::now();
         physics_world.step();
-        window.render(&physics_world);
+        if tracking % (value!(SIMULATION_FREQUENCY, Hz, f32) as u32 / 30) == 0 {
+            window.render(&physics_world);
+        }
         let processing_time = start_time.elapsed();
-        println!("{:?}", processing_time);
+        if tracking % 50 == 0 {
+            println!("{:?}", processing_time);
+        }
+        tracking += 1;
         if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
             // thread::sleep(Duration::from_secs_f32(0.2));
             thread::sleep(
