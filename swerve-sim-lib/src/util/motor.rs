@@ -5,7 +5,8 @@
 
 use whippyunits::{quantity, unit};
 
-struct Motor {
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Motor {
     pub nominal_voltage: unit!(volt, f32),
     pub stall_torque: unit!(Nm, f32),
     pub stall_current: unit!(ampere, f32),

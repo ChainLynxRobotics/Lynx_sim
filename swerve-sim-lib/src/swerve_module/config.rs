@@ -1,4 +1,6 @@
 use whippyunits::unit;
+
+use crate::util::motor::Motor;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct SwerveModuleConfig {
     pub wheel_radius: unit!(m, f32),
@@ -18,6 +20,8 @@ pub struct SwerveModuleConfig {
     pub drive_gear_ratio: f32,
     pub turn_gear_ratio: f32,
     pub coupling_ratio: f32,
+    pub drive_motor: Motor,
+    pub turn_motor: Motor,
 }
 impl SwerveModuleConfig {
     pub const fn new(
@@ -38,6 +42,8 @@ impl SwerveModuleConfig {
         drive_gear_ratio: f32,
         turn_gear_ratio: f32,
         coupling_ratio: f32,
+        drive_motor: Motor,
+        turn_motor: Motor,
     ) -> Self {
         return SwerveModuleConfig {
             wheel_radius,
@@ -57,6 +63,8 @@ impl SwerveModuleConfig {
             drive_gear_ratio,
             turn_gear_ratio,
             coupling_ratio,
+            drive_motor,
+            turn_motor,
         };
     }
 }

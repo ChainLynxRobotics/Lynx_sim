@@ -1,3 +1,5 @@
+use crate::util::motor::Motor;
+
 use super::config::SwerveModuleConfig;
 use culit::culit;
 use whippyunits::{quantity, unit};
@@ -151,5 +153,7 @@ pub fn generate_mk4i_swerve_config(
         drive_gear_ratio: gear_train_properties.drive_gear_ratio,
         turn_gear_ratio: gear_train_properties.turn_gear_ratio,
         coupling_ratio: gear_train_properties.coupling_ratio,
+        drive_motor: Motor::krakenx60_foc(),
+        turn_motor: Motor::krakenx60_foc(),
     };
 }
