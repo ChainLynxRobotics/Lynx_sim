@@ -1,3 +1,4 @@
+use cgmath::Vector3;
 use winit::keyboard::KeyCode;
 
 #[rustfmt::skip]
@@ -140,7 +141,12 @@ impl CameraController {
     pub fn update_camera(&self, camera: &mut Camera) {
         use cgmath::InnerSpace;
         let forward = camera.target - camera.eye;
-        let forward_norm = forward.normalize();
+        let forward_norm: Vector3<f32> = Vector3 {
+            x: forward.x,
+            y: forward.y,
+            z: 0.0,
+        }
+        .normalize();
 
         let right = forward_norm.cross(camera.up).normalize();
 
