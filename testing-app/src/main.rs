@@ -6,7 +6,7 @@ use std::{
 use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
-    dynamics::{FixedJointBuilder, RigidBodyBuilder},
+    dynamics::RigidBodyBuilder,
     geometry::ColliderBuilder,
     math::{Vec3, Vector},
 };
