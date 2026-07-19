@@ -7,21 +7,21 @@ use whippyunits::{quantity, unit};
 
 struct Motor {
     pub nominal_voltage: unit!(volt, f32),
-    pub stall_torque: unit!(newton / m, f32),
+    pub stall_torque: unit!(Nm, f32),
     pub stall_current: unit!(ampere, f32),
     pub free_current: unit!(ampere, f32),
-    pub free_speed: unit!(rad / s, f32),
+    pub free_speed: unit!(radians / s, f32),
     pub internal_resistance: unit!(ohm, f32),
-    pub kv: unit!((rad / s) / volt, f32),
-    pub kt: unit!((newton / m) / ampere, f32),
+    pub kv: unit!((radians / s) / volt, f32),
+    pub kt: unit!(Nm / ampere, f32),
 }
 impl Motor {
     fn new(
         nominal_voltage: unit!(volt, f32),
-        stall_torque: unit!(newton / m, f32),
+        stall_torque: unit!(Nm, f32),
         stall_current: unit!(ampere, f32),
         free_current: unit!(ampere, f32),
-        free_speed: unit!(rad / s, f32),
+        free_speed: unit!(radians / s, f32),
     ) -> Self {
         let internal_resistance = nominal_voltage / stall_current;
         Self {
@@ -42,18 +42,18 @@ impl Motor {
     /// * `voltageInput` The voltage being applied to the motor.
     pub fn get_current(
         &self,
-        velocity: unit!(rad / s, f32),
+        velocity: unit!(radians / s, f32),
         voltage_input: unit!(volt, f32),
     ) -> unit!(ampere, f32) {
-        return -1.0 / self.kv / self.internal_resistance * velocity
-            + 1.0 / self.internal_resistance * voltage_input;
+        return (-1.0 / self.kv / self.internal_resistance * velocity
+            + (1.0 / self.internal_resistance * voltage_input));
     }
 
     /// Calculate current drawn by motor for a given torque.
     ///
     /// # Parameters
     /// * `torque` The torque produced by the motor.
-    pub fn get_current_from_torque(self, torque: unit!(newton / m, f32)) -> unit!(ampere, f32) {
+    pub fn get_current_from_torque(self, torque: unit!(Nm, f32)) -> unit!(ampere, f32) {
         return torque / self.kt;
     }
 
@@ -61,7 +61,7 @@ impl Motor {
     ///
     /// # Parameters
     /// * `current` The current drawn by the motor.
-    pub fn get_torque(self, current: unit!(ampere, f32)) -> unit!(newton / m, f32) {
+    pub fn get_torque(self, current: unit!(ampere, f32)) -> unit!(Nm, f32) {
         return current * self.kt;
     }
 
@@ -72,10 +72,11 @@ impl Motor {
     /// * `velocity` The current angular velocity of the motor.
     pub fn get_voltage(
         self,
-        torque: unit!(newton / m, f32),
-        velocity: unit!(rad / s, f32),
+        torque: unit!(Nm, f32),
+        velocity: unit!(radians / s, f32),
     ) -> unit!(volt, f32) {
-        return 1.0 / self.kv * velocity + 1.0 / self.kt * self.internal_resistance * torque;
+        return (1.0 / self.kv * velocity + 1.0 / self.kt * self.internal_resistance * torque)
+            .into();
     }
 
     /// Calculates the angular velocity produced by the motor at a given torque and input voltage.
@@ -85,10 +86,31 @@ impl Motor {
     /// * `voltageInput` The voltage applied to the motor.
     pub fn get_velocity(
         self,
-        torque: unit!(newton / m, f32),
+        torque: unit!(Nm, f32),
         voltage_input: unit!(volt, f32),
-    ) -> unit!(rad / s, f32) {
-        return voltage_input * self.kv
-            - 1.0 / self.kt * torque * self.internal_resistance * self.kv;
+    ) -> unit!(radians / s, f32) {
+        return (voltage_input * self.kv
+            - 1.0 / self.kt * torque * self.internal_resistance * self.kv);
+    }
+
+    pub fn krakenx60() -> Self {
+        Self::new(
+            quantity!(12.0, volt, f32),
+            quantity!(7.09, Nm, f32),
+            quantity!(366.0, ampere, f32),
+            quantity!(2.0, ampere, f32),
+            // 6000 rpm
+            quantity!(628.319, radians / s, f32),
+        )
+    }
+    pub fn krakenx60_foc() -> Self {
+        Self::new(
+            quantity!(12.0, volt, f32),
+            quantity!(9.37, Nm, f32),
+            quantity!(483.0, ampere, f32),
+            quantity!(2.0, ampere, f32),
+            // 5800 rpm
+            quantity!(607.375, radians / s, f32),
+        )
     }
 }
