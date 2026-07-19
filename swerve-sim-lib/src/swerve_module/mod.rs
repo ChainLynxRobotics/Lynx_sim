@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use rapier3d::dynamics::FixedJointBuilder;
+use rapier3d::dynamics::{FixedJointBuilder, ImpulseJointSet};
 use rapier3d::{
     math::{Vec3, Vector},
     prelude::{
@@ -31,7 +31,7 @@ impl SwerveModule {
         drive_base_handle: RigidBodyHandle,
         rigid_body_set: &mut RigidBodySet,
         collider_set: &mut ColliderSet,
-        joint_set: &mut MultibodyJointSet,
+        joint_set: &mut ImpulseJointSet,
     ) -> Self {
         let wheel = RigidBodyBuilder::dynamic()
             .translation(
@@ -131,12 +131,8 @@ impl SwerveModule {
             .local_anchor2(Vec3::ZERO)
             .build();
 
-        joint_set
-            .insert(wheel_rotation_body, wheel, wheel_joint, true)
-            .expect("Failed to insert joint");
-        joint_set
-            .insert(azumith_rotation_body, azumith, azumith_joint, true)
-            .expect("Failed to insert joint");
+        joint_set.insert(wheel_rotation_body, wheel, wheel_joint, true);
+        joint_set.insert(azumith_rotation_body, azumith, azumith_joint, true);
         return SwerveModule {
             config,
             wheel_handle: wheel,

@@ -53,7 +53,7 @@ fn main() {
         drive_base,
         &mut physics_world.rigid_body_set,
         &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
+        &mut physics_world.impulse_joint_set,
     );
     let swerve_module2 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
@@ -65,7 +65,7 @@ fn main() {
         drive_base,
         &mut physics_world.rigid_body_set,
         &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
+        &mut physics_world.impulse_joint_set,
     );
     let swerve_module3 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
@@ -77,7 +77,7 @@ fn main() {
         drive_base,
         &mut physics_world.rigid_body_set,
         &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
+        &mut physics_world.impulse_joint_set,
     );
     let swerve_module4 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
@@ -89,7 +89,7 @@ fn main() {
         drive_base,
         &mut physics_world.rigid_body_set,
         &mut physics_world.collider_set,
-        &mut physics_world.multibody_joint_set,
+        &mut physics_world.impulse_joint_set,
     );
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
