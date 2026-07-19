@@ -113,54 +113,6 @@ fn main() {
         ground,
         &mut physics_world.rigid_body_set,
     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module1.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module2.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module3.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
-    // physics_world
-    //     .rigid_body_set
-    //     .get_mut(swerve_module4.wheel_handle)
-    //     .expect("wheel doesnt exist")
-    //     .add_torque(
-    //         Vec3 {
-    //             x: 0.0,
-    //             y: 10.0,
-    //             z: 0.0,
-    //         },
-    //         true,
-    //     );
     let mut tracking = 0;
     let mut loop_overuns = 0;
     loop {
@@ -176,7 +128,6 @@ fn main() {
         }
         tracking += 1;
         if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
-            // thread::sleep(Duration::from_secs_f32(0.2));
             thread::sleep(
                 Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
             );
