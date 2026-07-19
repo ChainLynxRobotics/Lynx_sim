@@ -13,7 +13,7 @@ pub struct Camera {
     eye: cgmath::Point3<f32>,
     target: cgmath::Point3<f32>,
     up: cgmath::Vector3<f32>,
-    asspect: f32,
+    pub asspect: f32,
     fovy: f32,
     znear: f32,
     zfar: f32,

@@ -199,6 +199,7 @@ impl State {
             self.config.height = height;
             self.surface.configure(&self.device, &self.config);
             self.is_surface_configured = true;
+            self.camera.asspect = (width as f32) / (height as f32);
         }
     }
     pub fn render(&mut self) -> anyhow::Result<()> {
