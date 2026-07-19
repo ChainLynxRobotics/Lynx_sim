@@ -37,11 +37,11 @@ fn main() {
         .restitution(0.0)
         .mass(50.0)
         .build();
-    physics_world.collider_set.insert_with_parent(
-        drive_base_colider,
-        drive_base,
-        &mut physics_world.rigid_body_set,
-    );
+    // physics_world.collider_set.insert_with_parent(
+    //     drive_base_colider,
+    //     drive_base,
+    //     &mut physics_world.rigid_body_set,
+    // );
     // 6.375 in from edge
     let swerve_module1 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
@@ -55,42 +55,42 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.impulse_joint_set,
     );
-    let swerve_module2 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: 0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
-    let swerve_module3 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: 0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
-    let swerve_module4 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
+    // let swerve_module2 = SwerveModule::new(
+    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+    //     Vec3 {
+    //         x: -0.28,
+    //         y: 0.28,
+    //         z: -0.055,
+    //     },
+    //     drive_base,
+    //     &mut physics_world.rigid_body_set,
+    //     &mut physics_world.collider_set,
+    //     &mut physics_world.impulse_joint_set,
+    // );
+    // let swerve_module3 = SwerveModule::new(
+    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+    //     Vec3 {
+    //         x: 0.28,
+    //         y: -0.28,
+    //         z: -0.055,
+    //     },
+    //     drive_base,
+    //     &mut physics_world.rigid_body_set,
+    //     &mut physics_world.collider_set,
+    //     &mut physics_world.impulse_joint_set,
+    // );
+    // let swerve_module4 = SwerveModule::new(
+    //     generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
+    //     Vec3 {
+    //         x: -0.28,
+    //         y: -0.28,
+    //         z: -0.055,
+    //     },
+    //     drive_base,
+    //     &mut physics_world.rigid_body_set,
+    //     &mut physics_world.collider_set,
+    //     &mut physics_world.impulse_joint_set,
+    // );
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
