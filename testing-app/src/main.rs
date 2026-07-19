@@ -162,6 +162,7 @@ fn main() {
     //         true,
     //     );
     let mut tracking = 0;
+    let mut loop_overuns = 0;
     loop {
         let start_time = Instant::now();
         physics_world.step();
@@ -170,7 +171,8 @@ fn main() {
         }
         let processing_time = start_time.elapsed();
         if tracking % 50 == 0 {
-            println!("{:?}", processing_time);
+            println!("processing time: {:?}", processing_time);
+            println!("loop overuns: {}", loop_overuns);
         }
         tracking += 1;
         if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
@@ -178,6 +180,8 @@ fn main() {
             thread::sleep(
                 Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
             );
+        } else {
+            loop_overuns += 1;
         }
     }
 }
