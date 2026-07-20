@@ -22,7 +22,7 @@ mod test {
             drive_base,
             &mut physics_world.rigid_body_set,
             &mut physics_world.collider_set,
-            &mut physics_world.multibody_joint_set,
+            &mut physics_world.impulse_joint_set,
         );
     }
 
@@ -42,7 +42,7 @@ mod test {
             drive_base,
             &mut physics_world.rigid_body_set,
             &mut physics_world.collider_set,
-            &mut physics_world.multibody_joint_set,
+            &mut physics_world.impulse_joint_set,
         );
         println!("{}", swerve_module.config.drive_moi);
         println!("{}", swerve_module.config.azumith_moi);
