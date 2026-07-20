@@ -1,16 +1,18 @@
 use std::f32::consts::PI;
 
-use rapier3d::dynamics::{FixedJointBuilder, ImpulseJointSet};
+use rapier3d::dynamics::ImpulseJointSet;
+use rapier3d::math::AngVector;
 use rapier3d::{
     math::{Vec3, Vector},
     prelude::{
-        ColliderBuilder, ColliderSet, MassProperties, MultibodyJointSet, RevoluteJointBuilder,
-        RigidBodyBuilder, RigidBodyHandle, RigidBodySet,
+        ColliderBuilder, ColliderSet, MassProperties, RevoluteJointBuilder, RigidBodyBuilder,
+        RigidBodyHandle, RigidBodySet,
     },
 };
-use whippyunits::value;
+use whippyunits::{quantity, unit, value};
 
 use crate::ROBOT_INTERACTION_GROUPS;
+use crate::physics_world::PhysicsWorld;
 
 use self::config::SwerveModuleConfig;
 
@@ -110,5 +112,68 @@ impl SwerveModule {
             wheel,
             azumith,
         };
+    }
+
+    pub fn apply_voltages(
+        &self,
+        drive: unit!(volt, f32),
+        turn: unit!(volt, f32),
+        physics_world: &mut PhysicsWorld,
+    ) {
+        let drive_motor = self.config.drive_motor;
+        let turn_motor = self.config.turn_motor;
+        {
+            let wheel = physics_world
+                .rigid_body_set
+                .get_mut(self.wheel)
+                .expect("Rigid body set didnt have wheel");
+            wheel.reset_torques(false);
+            let wheel_speeds: AngVector = wheel.position().inverse() * wheel.angvel();
+
+            wheel.add_torque(
+                wheel.position()
+                    * (Vec3::Y
+                        * value!(
+                            drive_motor.get_torque_from_voltage(
+                                drive,
+                                quantity!(
+                                    wheel_speeds.y * self.config.drive_gear_ratio,
+                                    radians / s,
+                                    f32
+                                ),
+                            ),
+                            Nm,
+                            f32
+                        )
+                        * self.config.drive_gear_ratio),
+                true,
+            );
+        }
+
+        let azumith = physics_world
+            .rigid_body_set
+            .get_mut(self.azumith)
+            .expect("Rigid body set didnt have azumith");
+        azumith.reset_torques(false);
+        let azumith_speeds = azumith.position().inverse() * azumith.angvel();
+
+        azumith.add_torque(
+            azumith.position()
+                * (Vec3::Z
+                    * value!(
+                        turn_motor.get_torque_from_voltage(
+                            turn,
+                            quantity!(
+                                azumith_speeds.z * self.config.turn_gear_ratio,
+                                radians / s,
+                                f32
+                            ),
+                        ),
+                        Nm,
+                        f32
+                    )
+                    * self.config.turn_gear_ratio),
+            true,
+        );
     }
 }
