@@ -56,6 +56,7 @@ impl State {
                 power_preference: LowPower,
                 force_fallback_adapter: false,
                 compatible_surface: Some(&surface),
+                apply_limit_buckets: false,
             })
             .await?;
 
@@ -86,6 +87,7 @@ impl State {
             desired_maximum_frame_latency: 2,
             alpha_mode: surface_caps.alpha_modes[0],
             view_formats: vec![],
+            color_space: wgpu::SurfaceColorSpace::Auto,
         };
         let camera = Camera::new(config.width, config.height);
         let mut camera_uniform = CameraUniform::new();
@@ -132,7 +134,7 @@ impl State {
                 module: &shader,
                 entry_point: Some("vs_main"),
                 compilation_options: wgpu::PipelineCompilationOptions::default(),
-                buffers: &[Vertex::desc()],
+                buffers: &[Some(Vertex::desc())],
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
@@ -270,7 +272,7 @@ impl State {
         }
 
         self.queue.submit(std::iter::once(encoder.finish()));
-        output.present();
+        self.queue.present(output);
 
         Ok(())
     }
