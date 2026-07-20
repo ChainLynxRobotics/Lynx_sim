@@ -66,6 +66,14 @@ impl Motor {
         return current * self.kt;
     }
 
+    pub fn get_torque_from_voltage(
+        self,
+        voltage: unit!(volt, f32),
+        velocity: unit!(radians / s, f32),
+    ) -> unit!(Nm, f32) {
+        self.get_torque(self.get_current(velocity, voltage))
+    }
+
     /// Calculate the voltage provided to the motor for a given torque and angular velocity.
     ///
     /// # Parameter
