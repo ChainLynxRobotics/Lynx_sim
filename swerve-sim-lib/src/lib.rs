@@ -1,3 +1,4 @@
+#![feature(random)]
 use rapier3d::geometry::{Group, InteractionGroups, InteractionTestMode::Or};
 
 pub mod physics_world;
