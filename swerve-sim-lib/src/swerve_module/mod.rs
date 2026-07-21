@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
-use rapier3d::dynamics::ImpulseJointSet;
-use rapier3d::math::AngVector;
+use rapier3d::dynamics::{ImpulseJointSet, RigidBody};
+use rapier3d::math::{AngVector, Pose3};
 use rapier3d::{
     math::{Vec3, Vector},
     prelude::{
@@ -13,6 +13,7 @@ use whippyunits::{quantity, unit, value};
 
 use crate::ROBOT_INTERACTION_GROUPS;
 use crate::physics_world::PhysicsWorld;
+use crate::util::motor::Motor;
 
 use self::config::SwerveModuleConfig;
 
@@ -122,58 +123,58 @@ impl SwerveModule {
     ) {
         let drive_motor = self.config.drive_motor;
         let turn_motor = self.config.turn_motor;
-        {
-            let wheel = physics_world
-                .rigid_body_set
-                .get_mut(self.wheel)
-                .expect("Rigid body set didnt have wheel");
-            wheel.reset_torques(false);
-            let wheel_speeds: AngVector = wheel.position().inverse() * wheel.angvel();
-
-            wheel.add_torque(
-                wheel.position()
-                    * (Vec3::Y
-                        * value!(
-                            drive_motor.get_torque_from_voltage(
-                                drive,
-                                quantity!(
-                                    wheel_speeds.y * self.config.drive_gear_ratio,
-                                    radians / s,
-                                    f32
-                                ),
-                            ),
-                            Nm,
-                            f32
-                        )
-                        * self.config.drive_gear_ratio),
-                true,
-            );
-        }
+        let wheel = physics_world
+            .rigid_body_set
+            .get_mut(self.wheel)
+            .expect("Rigid body set didnt have wheel");
+        Self::apply_voltage_to_motor(
+            drive_motor,
+            drive,
+            wheel,
+            Vec3::Y,
+            self.config.drive_gear_ratio,
+        );
 
         let azumith = physics_world
             .rigid_body_set
             .get_mut(self.azumith)
             .expect("Rigid body set didnt have azumith");
-        azumith.reset_torques(false);
-        let azumith_speeds = azumith.position().inverse() * azumith.angvel();
-
-        azumith.add_torque(
-            azumith.position()
-                * (Vec3::Z
-                    * value!(
-                        turn_motor.get_torque_from_voltage(
-                            turn,
-                            quantity!(
-                                azumith_speeds.z * self.config.turn_gear_ratio,
-                                radians / s,
-                                f32
-                            ),
-                        ),
-                        Nm,
-                        f32
-                    )
-                    * self.config.turn_gear_ratio),
-            true,
+        Self::apply_voltage_to_motor(
+            turn_motor,
+            turn,
+            azumith,
+            Vec3::Z,
+            self.config.turn_gear_ratio,
         );
+    }
+
+    fn apply_voltage_to_motor(
+        motor: Motor,
+        voltage: unit!(volt, f32),
+        rb: &mut RigidBody,
+        rotation_axis: Vec3,
+        gear_ratio: f32,
+    ) {
+        let rotation_axis = rotation_axis.normalize();
+        rb.reset_torques(false);
+
+        let speeds: AngVector =
+            Pose3::from_parts(Vec3::ZERO, rb.position().rotation).inverse() * rb.angvel();
+
+        let speed = speeds * rotation_axis;
+        let speed_sign = 1.0f32.copysign(speed.x + speed.y + speed.z);
+        let speed = speed.length() * speed_sign * gear_ratio;
+
+        let calculated_torque = value!(
+            motor.get_torque_from_voltage(voltage, quantity!(speed, radians / s, f32),),
+            Nm,
+            f32
+        );
+
+        let calculated_torque = rotation_axis * calculated_torque * gear_ratio;
+        let calculated_torque =
+            Pose3::from_parts(Vec3::ZERO, rb.position().rotation) * calculated_torque;
+
+        rb.add_torque(calculated_torque, true);
     }
 }
