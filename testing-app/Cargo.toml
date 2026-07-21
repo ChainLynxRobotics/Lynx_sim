@@ -7,3 +7,4 @@ edition = "2024"
 rapier3d = "0.34.0"
 swerve-sim-3d = { path = "../swerve-sim-lib" }
 whippyunits = "0.2.2"
+ipc-types = { path = "../ipc-types" }

@@ -4,7 +4,7 @@ use std::{
 };
 
 use ipc_channel::ipc::IpcReceiver;
-use ipc_types::Message;
+use ipc_types::{FRAME_RATE, Message};
 use winit::{
     application::ApplicationHandler,
     event::{KeyEvent, StartCause, WindowEvent},
@@ -15,8 +15,7 @@ use winit::{
 
 use crate::state::State;
 
-const FPS: f32 = 30.0;
-const FRAME_TIME: f32 = 1.0 / FPS;
+const FRAME_TIME: f32 = 1.0 / FRAME_RATE;
 pub struct App {
     state: Option<State>,
     render_target: Instant,

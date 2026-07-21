@@ -10,3 +10,5 @@ pub enum Message {
     StartTransfer,
     EndTransfer,
 }
+
+pub const FRAME_RATE: f32 = 60.0;

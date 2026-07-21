@@ -2395,6 +2395,7 @@ dependencies = [
 name = "testing-app"
 version = "0.1.0"
 dependencies = [
+ "ipc-types",
  "rapier3d",
  "swerve-sim-3d",
  "whippyunits",

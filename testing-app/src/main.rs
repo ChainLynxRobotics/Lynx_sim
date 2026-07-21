@@ -118,7 +118,7 @@ fn main() {
     loop {
         let start_time = Instant::now();
         physics_world.step();
-        if tracking % (value!(SIMULATION_FREQUENCY, Hz, f32) as u32 / 30) == 0 {
+        if tracking % (value!(SIMULATION_FREQUENCY, Hz, f32) as u32 / FRAME_RATE as u32) == 0 {
             window.render(&physics_world);
         }
         let processing_time = start_time.elapsed();
