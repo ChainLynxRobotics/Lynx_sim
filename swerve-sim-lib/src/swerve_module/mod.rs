@@ -68,7 +68,6 @@ impl SwerveModule {
             .clone()
             .ccd_enabled(true)
             .soft_ccd_prediction(0.05)
-            // .angular_damping(1.5)
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
             value!(config.wheel_width, m, f32) / 2.0,
