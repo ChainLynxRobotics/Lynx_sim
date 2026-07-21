@@ -46,8 +46,8 @@ impl Motor {
         velocity: unit!(radians / s, f32),
         voltage_input: unit!(volt, f32),
     ) -> unit!(ampere, f32) {
-        return (-1.0 / self.kv / self.internal_resistance * velocity
-            + (1.0 / self.internal_resistance * voltage_input));
+        return -1.0 / self.kv / self.internal_resistance * velocity
+            + (1.0 / self.internal_resistance * voltage_input);
     }
 
     /// Calculate current drawn by motor for a given torque.
@@ -98,8 +98,8 @@ impl Motor {
         torque: unit!(Nm, f32),
         voltage_input: unit!(volt, f32),
     ) -> unit!(radians / s, f32) {
-        return (voltage_input * self.kv
-            - 1.0 / self.kt * torque * self.internal_resistance * self.kv);
+        return voltage_input * self.kv
+            - 1.0 / self.kt * torque * self.internal_resistance * self.kv;
     }
 
     pub fn krakenx60() -> Self {
