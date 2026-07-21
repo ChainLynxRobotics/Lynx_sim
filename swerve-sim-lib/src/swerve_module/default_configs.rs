@@ -44,7 +44,7 @@ pub enum Mk4iGearRatio {
 }
 impl Mk4iGearRatio {
     const fn generate_gear_train_properties(&self) -> GearTrainProperties {
-        let azumith_moi = quantity!(0.000763062857, kg * m ^ 2, f32);
+        let azumith_moi = quantity!(0.01, kg * m ^ 2, f32);
         let azumith_secondary_moi = quantity!(0.0004489, kg * m ^ 2, f32);
         let azumith_mass = quantity!(0.41940695, kg, f32);
         // Height of the center of the azumith from the bottom of the frame rail
@@ -61,7 +61,7 @@ impl Mk4iGearRatio {
             Mk4iGearRatio::L1Plus => todo!(),
             Mk4iGearRatio::L2 => todo!(),
             // 0.00002277 + (0.00000319) * 3 + (0.00007443) * (17/27) * 3 + (0.00005322) * 1 * (17/27) * 3 + (0.0000024)* (50/16) * 1 * (17/27) * 3
-            Mk4iGearRatio::L2Plus => quantity!(0.000287623333333, kg * m ^ 2, f32),
+            Mk4iGearRatio::L2Plus => quantity!(0.01, kg * m ^ 2, f32),
             Mk4iGearRatio::L3 => todo!(),
             Mk4iGearRatio::L3Plus => todo!(),
         };
