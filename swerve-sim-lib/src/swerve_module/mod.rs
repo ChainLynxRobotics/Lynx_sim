@@ -50,8 +50,8 @@ impl SwerveModule {
             value!(config.azumith_mass, kg, f32),
             Vec3::new(
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
-                value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
                 value!(config.azumith_moi, kg * m ^ 2, f32),
+                value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
         .collision_groups(ROBOT_INTERACTION_GROUPS)
