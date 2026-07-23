@@ -3,7 +3,7 @@
 // translation of the importiant parts of
 // https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/org/wpilib/math/system/DCMotor.java
 
-use whippyunits::{quantity, unit};
+use whippyunits::{quantity, unit, value};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Motor {
@@ -100,6 +100,26 @@ impl Motor {
     ) -> unit!(radians / s, f32) {
         return voltage_input * self.kv
             - 1.0 / self.kt * torque * self.internal_resistance * self.kv;
+    }
+
+    pub fn get_velocity_in_dt(
+        self,
+        voltage_input: unit!(volt, f32),
+        current_velocity: unit!(radians / s, f32),
+        moment_of_inertia: unit!(kg * m ^ 2, f32),
+    ) -> unit!(radians / s, f32) {
+        // cant use united values in exponents so i have to convert to floats
+        let voltage_input = value!(voltage_input, volt, f32);
+        let current_velocity = value!(current_velocity, radians / s, f32);
+        let moment_of_inertia = value!(moment_of_inertia, kg * m ^ 2, f32);
+        let kv = value!(self.kv, (radians / s) / volt, f32);
+        let kt = value!(self.kt, Nm / ampere, f32);
+        let internal_resistance = value!(self.internal_resistance, ohm, f32);
+
+        let c = -current_velocity + voltage_input * kv;
+        let velocity = (voltage_input * kv)
+            - c * std::f32::consts::E.powf(-kt * moment_of_inertia / (internal_resistance * kv));
+        return quantity!(velocity, radians / s, f32);
     }
 
     pub fn krakenx60() -> Self {
