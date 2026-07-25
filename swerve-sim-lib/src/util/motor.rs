@@ -3,6 +3,8 @@
 // translation of the importiant parts of
 // https://github.com/wpilibsuite/allwpilib/blob/main/wpimath/src/main/java/org/wpilib/math/system/DCMotor.java
 
+use std::f32::consts::E;
+
 use whippyunits::{quantity, unit, value};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -11,9 +13,9 @@ pub struct Motor {
     pub stall_torque: unit!(Nm, f32),
     pub stall_current: unit!(ampere, f32),
     pub free_current: unit!(ampere, f32),
-    pub free_speed: unit!(radians / s, f32),
+    pub free_speed: unit!(radian / s, f32),
     pub internal_resistance: unit!(ohm, f32),
-    pub kv: unit!((radians / s) / volt, f32),
+    pub kv: unit!((radian / s) / volt, f32),
     pub kt: unit!(Nm / ampere, f32),
 }
 impl Motor {
@@ -22,7 +24,7 @@ impl Motor {
         stall_torque: unit!(Nm, f32),
         stall_current: unit!(ampere, f32),
         free_current: unit!(ampere, f32),
-        free_speed: unit!(radians / s, f32),
+        free_speed: unit!(radian / s, f32),
     ) -> Self {
         let internal_resistance = nominal_voltage / stall_current;
         Self {
@@ -43,7 +45,7 @@ impl Motor {
     /// * `voltageInput` The voltage being applied to the motor.
     pub fn get_current(
         &self,
-        velocity: unit!(radians / s, f32),
+        velocity: unit!(radian / s, f32),
         voltage_input: unit!(volt, f32),
     ) -> unit!(ampere, f32) {
         return -1.0 / self.kv / self.internal_resistance * velocity
@@ -69,7 +71,7 @@ impl Motor {
     pub fn get_torque_from_voltage(
         self,
         voltage: unit!(volt, f32),
-        velocity: unit!(radians / s, f32),
+        velocity: unit!(radian / s, f32),
     ) -> unit!(Nm, f32) {
         self.get_torque(self.get_current(velocity, voltage))
     }
@@ -82,7 +84,7 @@ impl Motor {
     pub fn get_voltage(
         self,
         torque: unit!(Nm, f32),
-        velocity: unit!(radians / s, f32),
+        velocity: unit!(radian / s, f32),
     ) -> unit!(volt, f32) {
         return (1.0 / self.kv * velocity + 1.0 / self.kt * self.internal_resistance * torque)
             .into();
@@ -97,7 +99,7 @@ impl Motor {
         self,
         torque: unit!(Nm, f32),
         voltage_input: unit!(volt, f32),
-    ) -> unit!(radians / s, f32) {
+    ) -> unit!(radian / s, f32) {
         return voltage_input * self.kv
             - 1.0 / self.kt * torque * self.internal_resistance * self.kv;
     }
@@ -105,21 +107,23 @@ impl Motor {
     pub fn get_velocity_in_dt(
         self,
         voltage_input: unit!(volt, f32),
-        current_velocity: unit!(radians / s, f32),
+        current_velocity: unit!(radian / s, f32),
         moment_of_inertia: unit!(kg * m ^ 2, f32),
-    ) -> unit!(radians / s, f32) {
+        dt: unit!(s, f32),
+    ) -> unit!(radian / s, f32) {
         // cant use united values in exponents so i have to convert to floats
         let voltage_input = value!(voltage_input, volt, f32);
-        let current_velocity = value!(current_velocity, radians / s, f32);
+        let current_velocity = value!(current_velocity, radian / s, f32);
         let moment_of_inertia = value!(moment_of_inertia, kg * m ^ 2, f32);
-        let kv = value!(self.kv, (radians / s) / volt, f32);
+        let dt = value!(dt, s, f32);
+        let kv = value!(self.kv, (radian / s) / volt, f32);
         let kt = value!(self.kt, Nm / ampere, f32);
         let internal_resistance = value!(self.internal_resistance, ohm, f32);
 
-        let c = -current_velocity + voltage_input * kv;
-        let velocity = (voltage_input * kv)
-            - c * std::f32::consts::E.powf(-kt * moment_of_inertia / (internal_resistance * kv));
-        return quantity!(velocity, radians / s, f32);
+        let a = -(kt / (kv * internal_resistance * moment_of_inertia));
+        let b = (kt / (internal_resistance * moment_of_inertia)) * voltage_input;
+        let velocity = (b * (E.powf(a * dt) - 1.0)) / a + current_velocity * E.powf(a * dt);
+        return quantity!(velocity, radian / s, f32);
     }
 
     pub fn krakenx60() -> Self {
@@ -129,7 +133,7 @@ impl Motor {
             quantity!(366.0, ampere, f32),
             quantity!(2.0, ampere, f32),
             // 6000 rpm
-            quantity!(628.319, radians / s, f32),
+            quantity!(628.319, radian / s, f32),
         )
     }
     pub fn krakenx60_foc() -> Self {
@@ -139,7 +143,7 @@ impl Motor {
             quantity!(483.0, ampere, f32),
             quantity!(2.0, ampere, f32),
             // 5800 rpm
-            quantity!(607.375, radians / s, f32),
+            quantity!(607.375, radian / s, f32),
         )
     }
 }

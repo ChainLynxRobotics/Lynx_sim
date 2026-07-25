@@ -118,6 +118,7 @@ impl SwerveModule {
         &self,
         drive: unit!(volt, f32),
         turn: unit!(volt, f32),
+        dt: unit!(s, f32),
         physics_world: &mut PhysicsWorld,
     ) {
         let drive_motor = self.config.drive_motor;
@@ -132,6 +133,7 @@ impl SwerveModule {
             wheel,
             Vec3::Y,
             self.config.drive_gear_ratio,
+            dt,
         );
 
         let azumith = physics_world
@@ -144,6 +146,7 @@ impl SwerveModule {
             azumith,
             Vec3::Z,
             self.config.turn_gear_ratio,
+            dt,
         );
     }
 
@@ -153,24 +156,32 @@ impl SwerveModule {
         rb: &mut RigidBody,
         rotation_axis: Vec3,
         gear_ratio: f32,
+        dt: unit!(s, f32),
     ) {
         let rotation_axis = rotation_axis.normalize();
         rb.reset_torques(false);
 
         let speeds: AngVector =
             Pose3::from_parts(Vec3::ZERO, rb.position().rotation).inverse() * rb.angvel();
+        let speed = speeds.dot(rotation_axis);
+        let speed = speed * gear_ratio;
+        let speed = quantity!(speed, radian / s, f32);
 
-        let speed = speeds * rotation_axis;
-        let speed_sign = 1.0f32.copysign(speed.x + speed.y + speed.z);
-        let speed = speed.length() * speed_sign * gear_ratio;
+        let moment_of_inertia =
+            (rb.mass_properties().local_mprops.principal_inertia().y) / gear_ratio;
 
-        let calculated_torque = value!(
-            motor.get_torque_from_voltage(voltage, quantity!(speed, radians / s, f32),),
-            Nm,
-            f32
+        let next_velocity = motor.get_velocity_in_dt(
+            voltage,
+            speed,
+            quantity!(moment_of_inertia, kg * m ^ 2, f32),
+            dt,
         );
+        let next_rb_velocity = next_velocity / gear_ratio;
+        let acceleration: unit!(radian / s ^ 2, f32) =
+            (next_rb_velocity - (speed / gear_ratio)) / dt;
+        let torque = acceleration * quantity!(moment_of_inertia * gear_ratio, kg * m ^ 2, f32);
 
-        let calculated_torque = rotation_axis * calculated_torque * gear_ratio;
+        let calculated_torque = rotation_axis * value!(torque.into(), Nm, f32);
         let calculated_torque =
             Pose3::from_parts(Vec3::ZERO, rb.position().rotation) * calculated_torque;
 

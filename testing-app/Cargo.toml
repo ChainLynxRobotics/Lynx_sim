@@ -6,5 +6,5 @@ edition = "2024"
 [dependencies]
 rapier3d = "0.34.0"
 swerve-sim-3d = { path = "../swerve-sim-lib" }
-whippyunits = "0.2.2"
+whippyunits = "0.2.6"
 ipc-types = { path = "../ipc-types" }

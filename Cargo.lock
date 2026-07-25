@@ -2998,9 +2998,9 @@ dependencies = [
 
 [[package]]
 name = "whippyunits"
-version = "0.2.2"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d60b7977a1048eb6f7f4044cfde0e089fd682a9bcde629465c81e1d1c22bdbe"
+checksum = "7e80566e3b78395a12cedbea4ab8636e6047ff14ab872ba19cbb82561f94c975"
 dependencies = [
  "culit",
  "libm",
@@ -3017,9 +3017,9 @@ dependencies = [
 
 [[package]]
 name = "whippyunits-core"
-version = "0.2.1"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9c58a73e0a91c30fc0534ef7a00f95acce704410623e8f6d6132454d87d7bce9"
+checksum = "553bc06c349de399110f99139949ae5784bc25291f288c5df34d95ebd916eb58"
 dependencies = [
  "proc-macro2",
  "syn",
@@ -3028,9 +3028,9 @@ dependencies = [
 
 [[package]]
 name = "whippyunits-proc-macros"
-version = "0.2.1"
+version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "617ea033a8475c9b295829f28e2842850e38bd1491c2840540a14a559cf5273f"
+checksum = "6f51a9caa95c7b120533752d575ef583fef8e7b9a66bd86b765393fc9363cd7e"
 dependencies = [
  "proc-macro2",
  "quote",

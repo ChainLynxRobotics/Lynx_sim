@@ -3,6 +3,7 @@ use std::{
     time::{Duration, Instant},
 };
 
+use ipc_types::FRAME_RATE;
 use whippyunits::{quantity, unit, value};
 
 use rapier3d::{
@@ -22,6 +23,7 @@ use swerve_sim_3d::{
 pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(250.0, Hz, f32);
 pub const SIMULATION_TIMESTEP: unit!(s, f32) =
     quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
+pub const SUB_STEPS: u32 = 5;
 
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
@@ -52,18 +54,6 @@ fn main() {
         &mut physics_world.collider_set,
         &mut physics_world.impulse_joint_set,
     );
-    physics_world
-        .rigid_body_set
-        .get_mut(swerve_module1.azumith)
-        .unwrap()
-        .add_torque(
-            Vec3 {
-                x: 0.0,
-                y: 0.0,
-                z: 0.1,
-            },
-            true,
-        );
     let swerve_module2 = SwerveModule::new(
         generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
         Vec3 {
@@ -115,21 +105,52 @@ fn main() {
     );
     let mut tracking = 0;
     let mut loop_overuns = 0;
+    let mut last_draw = Instant::now();
     loop {
         let start_time = Instant::now();
-        physics_world.step();
-        if tracking % (value!(SIMULATION_FREQUENCY, Hz, f32) as u32 / FRAME_RATE as u32) == 0 {
+        for _ in 0..SUB_STEPS {
+            swerve_module1.apply_voltages(
+                quantity!(12.0, volt, f32),
+                quantity!(12.0, volt, f32),
+                SIMULATION_TIMESTEP,
+                &mut physics_world,
+            );
+            swerve_module2.apply_voltages(
+                quantity!(5.0, volt, f32),
+                quantity!(5.0, volt, f32),
+                SIMULATION_TIMESTEP,
+                &mut physics_world,
+            );
+            swerve_module3.apply_voltages(
+                quantity!(5.0, volt, f32),
+                quantity!(5.0, volt, f32),
+                SIMULATION_TIMESTEP,
+                &mut physics_world,
+            );
+            swerve_module4.apply_voltages(
+                quantity!(5.0, volt, f32),
+                quantity!(5.0, volt, f32),
+                SIMULATION_TIMESTEP,
+                &mut physics_world,
+            );
+            physics_world.step();
+        }
+        if (last_draw + Duration::from_secs_f32(1.0 / FRAME_RATE)) <= Instant::now() {
             window.render(&physics_world);
+            last_draw = Instant::now();
         }
         let processing_time = start_time.elapsed();
         if tracking % 50 == 0 {
-            println!("processing time: {:?}", processing_time);
+            // println!("processing time: {:?}", processing_time);
             println!("loop overuns: {}", loop_overuns);
         }
         tracking += 1;
-        if processing_time <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) {
+        if processing_time
+            <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
+        {
             thread::sleep(
-                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP, s, f32)) - processing_time,
+                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
+                    - processing_time,
             );
         } else {
             loop_overuns += 1;
