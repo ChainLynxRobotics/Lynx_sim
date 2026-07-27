@@ -102,7 +102,11 @@ impl SwerveModule {
             .local_anchor2(Vec3::new(
                 0.0,
                 0.0,
-                value!(config.wheel_center_height, m, f32),
+                value!(
+                    config.wheel_center_height - config.azumith_center_height,
+                    m,
+                    f32
+                ),
             ))
             .build();
         joint_set.insert(wheel, azumith, wheel_joint, true);

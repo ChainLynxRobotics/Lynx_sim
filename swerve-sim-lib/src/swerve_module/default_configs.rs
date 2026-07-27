@@ -54,7 +54,8 @@ impl Mk4iGearRatio {
 
         let turn_gear_ratio: f32 = 150.0 / 7.0;
         let coupling_ratio: f32 = 50.0 / 14.0;
-        let wheel_center_height = quantity!(-0.04133150, m, f32);
+        // Height of the center of the wheel from the bottom of the frame rail
+        let wheel_center_height = quantity!(0.0062935, m, f32);
 
         let drive_moi = match self {
             Mk4iGearRatio::L1 => todo!(),
