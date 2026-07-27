@@ -1,25 +1,79 @@
-use crate::{physics_world, swerve_module::SwerveModule};
-use rapier3d::{math::Vec2, pipeline::PhysicsWorld, prelude::RigidBodyHandle};
-use whippyunits::unit;
+use crate::{
+    ROBOT_INTERACTION_GROUPS, physics_world,
+    swerve_module::{SwerveModule, config::SwerveModuleConfig},
+};
+use rapier3d::{
+    dynamics::{MassProperties, RigidBodyBuilder},
+    geometry::ColliderBuilder,
+    math::Vec3,
+    prelude::RigidBodyHandle,
+};
+use whippyunits::{unit, value};
 
-pub struct Robot {
-    drive_base: RigidBodyHandle,
-    front_left: SwerveModule,
-    front_right: SwerveModule,
-    back_left: SwerveModule,
-    back_right: SwerveModule,
+pub struct Robot<const NUMBER_OF_SWERVE_MODULES: usize> {
+    pub drive_base: RigidBodyHandle,
+    pub modules: [SwerveModule; NUMBER_OF_SWERVE_MODULES],
 }
-impl Robot {
+impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
     pub fn new(
         width: unit!(m, f32),
         height: unit!(m, f32),
+        bumper_height: unit!(m, f32),
         cornner_radius: unit!(m, f32),
-        front_left_location: Vec2,
-        front_right_location: Vec2,
-        back_left_location: Vec2,
-        back_right_location: Vec2,
-        physics_world: PhysicsWorld,
-    ) -> Robot {
-        todo!()
+        mass: unit!(kg, f32),
+        // TODO: Fix the fact that this is from the drive base collider and not from the floor
+        center_of_mass: Vec3,
+        moments_of_inertia: Vec3,
+        module_config: SwerveModuleConfig,
+        module_locations: [(unit!(m, f32), unit!(m, f32)); NUMBER_OF_SWERVE_MODULES],
+        physics_world: &mut physics_world::PhysicsWorld,
+    ) -> Robot<NUMBER_OF_SWERVE_MODULES> {
+        let drive_base = RigidBodyBuilder::dynamic().build();
+        let drive_base = physics_world.rigid_body_set.insert(drive_base);
+        // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference
+        // see https://rapier.rs/docs/user_guides/rust/colliders#round-shapes
+        let drive_base_colider = ColliderBuilder::round_cuboid(
+            value!((height / 2.0) - cornner_radius, m, f32),
+            value!((width / 2.0) - cornner_radius, m, f32),
+            value!(bumper_height / 2.0, m, f32),
+            value!(cornner_radius, m, f32),
+        )
+        .collision_groups(ROBOT_INTERACTION_GROUPS)
+        .mass_properties(MassProperties::new(
+            center_of_mass,
+            value!(
+                mass - (module_config.azumith_mass + module_config.wheel_mass),
+                kg,
+                f32
+            ),
+            moments_of_inertia,
+        ))
+        .restitution(0.0)
+        .build();
+
+        physics_world.collider_set.insert_with_parent(
+            drive_base_colider,
+            drive_base,
+            &mut physics_world.rigid_body_set,
+        );
+
+        let modules = module_locations.map(|location| {
+            SwerveModule::new(
+                module_config,
+                Vec3::new(
+                    value!(location.0, m, f32),
+                    value!(location.1, m, f32),
+                    value!(-bumper_height / 2.0, m, f32),
+                ),
+                drive_base,
+                &mut physics_world.rigid_body_set,
+                &mut physics_world.collider_set,
+                &mut physics_world.impulse_joint_set,
+            )
+        });
+        Robot {
+            drive_base,
+            modules,
+        }
     }
 }
