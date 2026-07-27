@@ -4,7 +4,7 @@ use std::{
 };
 
 use ipc_types::FRAME_RATE;
-use whippyunits::{quantity, unit, value};
+use whippyunits::{quantity, rescale, unit, value};
 
 use rapier3d::{
     dynamics::RigidBodyBuilder,
@@ -12,11 +12,11 @@ use rapier3d::{
     math::{Vec3, Vector},
 };
 use swerve_sim_3d::{
-    FIELD_INTERACTION_GROUPS, ROBOT_INTERACTION_GROUPS,
+    FIELD_INTERACTION_GROUPS,
     physics_world::PhysicsWorld,
-    swerve_module::{
-        SwerveModule,
-        default_configs::{Mk4iGearRatio, Mk4iWheel, generate_mk4i_swerve_config},
+    robot::Robot,
+    swerve_module::default_configs::{
+        Mk4iGearRatio::L2Plus, Mk4iWheel::Billet, generate_mk4i_swerve_config,
     },
     util::debug_render::DebugWindow,
 };
@@ -28,68 +28,25 @@ pub const SUB_STEPS: u32 = 5;
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
-    let drive_base = RigidBodyBuilder::dynamic().build();
-    let drive_base = physics_world.rigid_body_set.insert(drive_base);
-    // 17.25 in
-    let drive_base_colider = ColliderBuilder::cuboid(0.44, 0.44, 0.055)
-        .collision_groups(ROBOT_INTERACTION_GROUPS)
-        .restitution(0.0)
-        .mass(50.0)
-        .build();
-    physics_world.collider_set.insert_with_parent(
-        drive_base_colider,
-        drive_base,
-        &mut physics_world.rigid_body_set,
+
+    let robot = Robot::new(
+        rescale!(quantity!(34.5, inch, f32), m, f32),
+        rescale!(quantity!(34.5, inch, f32), m, f32),
+        quantity!(0.11, m, f32),
+        quantity!(0.01, m, f32),
+        quantity!(50.0, kg, f32),
+        Vec3::ZERO,
+        Vec3::ONE,
+        generate_mk4i_swerve_config(L2Plus, Billet),
+        [
+            (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
+            (quantity!(0.28, m, f32), (quantity!(-0.28, m, f32))),
+            (quantity!(-0.28, m, f32), (quantity!(0.28, m, f32))),
+            (quantity!(-0.28, m, f32), (quantity!(-0.28, m, f32))),
+        ],
+        &mut physics_world,
     );
-    // 6.375 in from edge
-    let swerve_module1 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: 0.28,
-            y: 0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
-    let swerve_module2 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: 0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
-    let swerve_module3 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: 0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
-    let swerve_module4 = SwerveModule::new(
-        generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-        Vec3 {
-            x: -0.28,
-            y: -0.28,
-            z: -0.055,
-        },
-        drive_base,
-        &mut physics_world.rigid_body_set,
-        &mut physics_world.collider_set,
-        &mut physics_world.impulse_joint_set,
-    );
+
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
         .build();
@@ -109,30 +66,14 @@ fn main() {
     loop {
         let start_time = Instant::now();
         for _ in 0..SUB_STEPS {
-            swerve_module1.apply_voltages(
-                quantity!(12.0, volt, f32),
-                quantity!(12.0, volt, f32),
-                SIMULATION_TIMESTEP,
-                &mut physics_world,
-            );
-            swerve_module2.apply_voltages(
-                quantity!(5.0, volt, f32),
-                quantity!(5.0, volt, f32),
-                SIMULATION_TIMESTEP,
-                &mut physics_world,
-            );
-            swerve_module3.apply_voltages(
-                quantity!(5.0, volt, f32),
-                quantity!(5.0, volt, f32),
-                SIMULATION_TIMESTEP,
-                &mut physics_world,
-            );
-            swerve_module4.apply_voltages(
-                quantity!(5.0, volt, f32),
-                quantity!(5.0, volt, f32),
-                SIMULATION_TIMESTEP,
-                &mut physics_world,
-            );
+            robot.modules.iter().for_each(|module| {
+                module.apply_voltages(
+                    quantity!(5.0, volt, f32),
+                    quantity!(5.0, volt, f32),
+                    SIMULATION_TIMESTEP,
+                    &mut physics_world,
+                );
+            });
             physics_world.step();
         }
         if (last_draw + Duration::from_secs_f32(1.0 / FRAME_RATE)) <= Instant::now() {
