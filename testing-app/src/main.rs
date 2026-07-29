@@ -68,7 +68,7 @@ fn main() {
     );
 
     let ground = RigidBodyBuilder::fixed()
-        .translation(Vector::new(0.0, 0.0, -2.0))
+        .translation(Vector::new(0.0, 0.0, -1.0))
         .build();
     let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0)
         .collision_groups(FIELD_INTERACTION_GROUPS)
