@@ -66,9 +66,6 @@ impl SwerveModule {
             .pose(drive_base_position.append_translation(
                 module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             ))
-            .clone()
-            .ccd_enabled(true)
-            .soft_ccd_prediction(0.05)
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
             value!(config.wheel_width, m, f32) / 2.0,
