@@ -5,7 +5,7 @@ use crate::{
 use rapier3d::{
     dynamics::{MassProperties, RigidBodyBuilder},
     geometry::ColliderBuilder,
-    math::Vec3,
+    math::{Pose3, Vec3},
     prelude::RigidBodyHandle,
 };
 use whippyunits::{quantity, unit, value};
@@ -16,6 +16,8 @@ pub struct Robot<const NUMBER_OF_SWERVE_MODULES: usize> {
 }
 impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
     pub fn new(
+        // TODO: Fix the fact that this is from the drive base collider and not from the floor
+        starting_position: Pose3,
         width: unit!(m, f32),
         height: unit!(m, f32),
         bumper_height: unit!(m, f32),
@@ -28,7 +30,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
         module_locations: [(unit!(m, f32), unit!(m, f32)); NUMBER_OF_SWERVE_MODULES],
         physics_world: &mut physics_world::PhysicsWorld,
     ) -> Robot<NUMBER_OF_SWERVE_MODULES> {
-        let drive_base = RigidBodyBuilder::dynamic().build();
+        let drive_base = RigidBodyBuilder::dynamic().pose(starting_position).build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
             // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference

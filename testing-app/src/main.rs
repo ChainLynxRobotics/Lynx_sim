@@ -10,6 +10,7 @@ use rapier3d::{
     dynamics::RigidBodyBuilder,
     geometry::ColliderBuilder,
     math::{Vec3, Vector},
+    prelude::Pose3,
 };
 use swerve_sim_3d::{
     FIELD_INTERACTION_GROUPS,
@@ -30,6 +31,7 @@ fn main() {
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
 
     let robot = Robot::new(
+        Pose3::IDENTITY,
         rescale!(quantity!(34.5, inch, f32), m, f32),
         rescale!(quantity!(34.5, inch, f32), m, f32),
         quantity!(0.11, m, f32),
