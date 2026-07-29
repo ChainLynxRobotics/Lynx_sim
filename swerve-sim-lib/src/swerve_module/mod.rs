@@ -11,7 +11,7 @@ use rapier3d::{
 };
 use whippyunits::{quantity, unit, value};
 
-use crate::ROBOT_INTERACTION_GROUPS;
+use crate::SWERVE_INTERACTION_GROUPS;
 use crate::physics_world::PhysicsWorld;
 use crate::util::motor::Motor;
 
@@ -54,7 +54,7 @@ impl SwerveModule {
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
-        .collision_groups(ROBOT_INTERACTION_GROUPS)
+        .collision_groups(SWERVE_INTERACTION_GROUPS)
         .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
         .restitution(0.0)
         .build();
@@ -84,7 +84,7 @@ impl SwerveModule {
                 value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
-        .collision_groups(ROBOT_INTERACTION_GROUPS)
+        .collision_groups(SWERVE_INTERACTION_GROUPS)
         .build();
         let wheel = rigid_body_set.insert(wheel);
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);

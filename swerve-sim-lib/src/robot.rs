@@ -1,5 +1,5 @@
 use crate::{
-    ROBOT_INTERACTION_GROUPS, physics_world,
+    BUMPER_INTERACTION_GROUPS, physics_world,
     swerve_module::{SwerveModule, config::SwerveModuleConfig},
 };
 use rapier3d::{
@@ -50,7 +50,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
             )
         };
         let drive_base_collider = drive_base_collider
-            .collision_groups(ROBOT_INTERACTION_GROUPS)
+            .collision_groups(BUMPER_INTERACTION_GROUPS)
             .mass_properties(MassProperties::new(
                 center_of_mass,
                 value!(
