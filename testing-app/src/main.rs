@@ -49,7 +49,7 @@ fn main() {
         &mut physics_world,
     );
     let robot2 = Robot::new(
-        Pose3::from_translation(Vec3::new(0.75, 0.75, 1.0)),
+        Pose3::from_translation(Vec3::new(1.0, 1.0, 0.0)),
         rescale!(quantity!(34.5, inch, f32), m, f32),
         rescale!(quantity!(34.5, inch, f32), m, f32),
         quantity!(0.11, m, f32),
