@@ -48,6 +48,24 @@ fn main() {
         ],
         &mut physics_world,
     );
+    let robot2 = Robot::new(
+        Pose3::from_translation(Vec3::new(0.75, 0.75, 1.0)),
+        rescale!(quantity!(34.5, inch, f32), m, f32),
+        rescale!(quantity!(34.5, inch, f32), m, f32),
+        quantity!(0.11, m, f32),
+        quantity!(0.01, m, f32),
+        quantity!(50.0, kg, f32),
+        Vec3::ZERO,
+        Vec3::ONE,
+        generate_mk4i_swerve_config(L2Plus, Billet),
+        [
+            (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
+            (quantity!(0.28, m, f32), (quantity!(-0.28, m, f32))),
+            (quantity!(-0.28, m, f32), (quantity!(0.28, m, f32))),
+            (quantity!(-0.28, m, f32), (quantity!(-0.28, m, f32))),
+        ],
+        &mut physics_world,
+    );
 
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -2.0))
@@ -69,6 +87,14 @@ fn main() {
         let start_time = Instant::now();
         for _ in 0..SUB_STEPS {
             robot.modules.iter().for_each(|module| {
+                module.apply_voltages(
+                    quantity!(5.0, volt, f32),
+                    quantity!(5.0, volt, f32),
+                    SIMULATION_TIMESTEP,
+                    &mut physics_world,
+                );
+            });
+            robot2.modules.iter().for_each(|module| {
                 module.apply_voltages(
                     quantity!(5.0, volt, f32),
                     quantity!(5.0, volt, f32),
