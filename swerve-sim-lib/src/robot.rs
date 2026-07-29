@@ -8,7 +8,7 @@ use rapier3d::{
     math::Vec3,
     prelude::RigidBodyHandle,
 };
-use whippyunits::{unit, value};
+use whippyunits::{quantity, unit, value};
 
 pub struct Robot<const NUMBER_OF_SWERVE_MODULES: usize> {
     pub drive_base: RigidBodyHandle,
@@ -30,29 +30,38 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
     ) -> Robot<NUMBER_OF_SWERVE_MODULES> {
         let drive_base = RigidBodyBuilder::dynamic().build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
-        // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference
-        // see https://rapier.rs/docs/user_guides/rust/colliders#round-shapes
-        let drive_base_colider = ColliderBuilder::round_cuboid(
-            value!((height / 2.0) - cornner_radius, m, f32),
-            value!((width / 2.0) - cornner_radius, m, f32),
-            value!(bumper_height / 2.0, m, f32),
-            value!(cornner_radius, m, f32),
-        )
-        .collision_groups(ROBOT_INTERACTION_GROUPS)
-        .mass_properties(MassProperties::new(
-            center_of_mass,
-            value!(
-                mass - (module_config.azumith_mass + module_config.wheel_mass),
-                kg,
-                f32
-            ),
-            moments_of_inertia,
-        ))
-        .restitution(0.0)
-        .build();
-
+        let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
+            // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference
+            // see https://rapier.rs/docs/user_guides/rust/colliders#round-shapes
+            ColliderBuilder::round_cuboid(
+                value!((height / 2.0) - cornner_radius, m, f32),
+                value!((width / 2.0) - cornner_radius, m, f32),
+                value!(bumper_height / 2.0, m, f32),
+                value!(cornner_radius, m, f32),
+            )
+        } else {
+            // https://github.com/dimforge/rapier/issues/969
+            ColliderBuilder::cuboid(
+                value!((height / 2.0) - cornner_radius, m, f32),
+                value!((width / 2.0) - cornner_radius, m, f32),
+                value!(bumper_height / 2.0, m, f32),
+            )
+        };
+        let drive_base_collider = drive_base_collider
+            .collision_groups(ROBOT_INTERACTION_GROUPS)
+            .mass_properties(MassProperties::new(
+                center_of_mass,
+                value!(
+                    mass - (module_config.azumith_mass + module_config.wheel_mass),
+                    kg,
+                    f32
+                ),
+                moments_of_inertia,
+            ))
+            .restitution(0.0)
+            .build();
         physics_world.collider_set.insert_with_parent(
-            drive_base_colider,
+            drive_base_collider,
             drive_base,
             &mut physics_world.rigid_body_set,
         );
