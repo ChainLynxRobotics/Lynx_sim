@@ -16,21 +16,25 @@ pub struct Robot<const NUMBER_OF_SWERVE_MODULES: usize> {
 }
 impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
     pub fn new(
-        // TODO: Fix the fact that this is from the drive base collider and not from the floor
         starting_position: Pose3,
         width: unit!(m, f32),
         height: unit!(m, f32),
         bumper_height: unit!(m, f32),
         cornner_radius: unit!(m, f32),
         mass: unit!(kg, f32),
-        // TODO: Fix the fact that this is from the drive base collider and not from the floor
         center_of_mass: Vec3,
         moments_of_inertia: Vec3,
         module_config: SwerveModuleConfig,
         module_locations: [(unit!(m, f32), unit!(m, f32)); NUMBER_OF_SWERVE_MODULES],
         physics_world: &mut physics_world::PhysicsWorld,
     ) -> Robot<NUMBER_OF_SWERVE_MODULES> {
-        let drive_base = RigidBodyBuilder::dynamic().pose(starting_position).build();
+        let drive_base_height = value!(
+            (bumper_height / 2.0) - module_config.wheel_center_height + module_config.wheel_radius,
+            m,
+            f32
+        );
+        let drive_base_pose = starting_position.append_translation(Vec3::Z * drive_base_height);
+        let drive_base = RigidBodyBuilder::dynamic().pose(drive_base_pose).build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
             // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference
@@ -52,7 +56,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
         let drive_base_collider = drive_base_collider
             .collision_groups(BUMPER_INTERACTION_GROUPS)
             .mass_properties(MassProperties::new(
-                center_of_mass,
+                center_of_mass - Vec3::Z * drive_base_height,
                 value!(
                     mass - (module_config.azumith_mass + module_config.wheel_mass),
                     kg,
@@ -76,6 +80,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
                     value!(location.1, m, f32),
                     value!(-bumper_height / 2.0, m, f32),
                 ),
+                drive_base_pose,
                 drive_base,
                 &mut physics_world.rigid_body_set,
                 &mut physics_world.collider_set,
