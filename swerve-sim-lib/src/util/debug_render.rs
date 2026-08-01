@@ -1,4 +1,8 @@
-use std::process::Command;
+use std::{
+    process::Command,
+    sync::mpsc::{self, Receiver, Sender},
+    thread::JoinHandle,
+};
 
 use ipc_channel::ipc::{IpcOneShotServer, IpcSender};
 use ipc_types::{DebugLine, Message};
@@ -61,7 +65,8 @@ mod hsla_test {
     }
 }
 pub struct DebugWindow {
-    pub sender: IpcSender<Message>,
+    pub sender: Sender<Message>,
+    pub handle: JoinHandle<()>,
 }
 impl DebugWindow {
     pub fn spawn_debug_window() -> Self {
@@ -80,7 +85,17 @@ impl DebugWindow {
             .expect("Failed to start window process");
         let (_rx, sender) = server.accept().expect("Accept failed");
 
-        return DebugWindow { sender };
+        let (tx, rx): (Sender<Message>, Receiver<Message>) = mpsc::channel();
+        let handle = std::thread::spawn(move || {
+            let rx = rx;
+            loop {
+                sender.send(rx.recv().unwrap()).unwrap();
+            }
+        });
+        Self {
+            sender: tx,
+            handle: handle,
+        }
     }
 
     pub fn render(&mut self, physics_world: &PhysicsWorld) {
