@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, sync::Arc};
 
 use ipc_channel::ipc::IpcReceiver;
-use ipc_types::{DebugLine, Message};
+use ipc_types::{DebugLine, Frame, Message};
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor, BlendState, Buffer,
     BufferUsages, ColorWrites, Features, MultisampleState,
@@ -31,13 +31,13 @@ pub struct State {
     camera_buffer: Buffer,
     camera_controller: CameraController,
     camera_bind_group: BindGroup,
-    message_receiver: Arc<IpcReceiver<Message>>,
-    message_buffer: VecDeque<Message>,
+    message_receiver: Arc<IpcReceiver<Frame>>,
+    last_lines: Vec<DebugLine>,
 }
 impl State {
     pub async fn new(
         window: Arc<Window>,
-        message_receiver: Arc<IpcReceiver<Message>>,
+        message_receiver: Arc<IpcReceiver<Frame>>,
     ) -> anyhow::Result<Self> {
         let size = window.inner_size();
 
@@ -191,7 +191,7 @@ impl State {
             camera_bind_group,
             camera_controller,
             message_receiver,
-            message_buffer: VecDeque::new(),
+            last_lines: Vec::new(),
         })
     }
 
@@ -209,9 +209,11 @@ impl State {
             return Ok(());
         }
 
-        self.read_all_messages()?;
-        let lines = self.get_most_up_to_date_lines_to_draw();
-        self.convert_debug_lines_to_vertex_buffer(lines);
+        match self.message_receiver.try_recv() {
+            Ok(frame) => self.last_lines = frame.data,
+            Err(_) => (),
+        };
+        self.convert_debug_lines_to_vertex_buffer();
 
         let output = match self.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture) => surface_texture,
@@ -295,59 +297,8 @@ impl State {
         );
     }
 
-    fn read_all_messages(&mut self) -> anyhow::Result<()> {
-        loop {
-            match self.message_receiver.try_recv() {
-                Ok(l) => self.message_buffer.push_back(l),
-                Err(e) => match e {
-                    ipc_channel::TryRecvError::IpcError(ipc_error) => {
-                        println!("{}", ipc_error);
-                        return Err(ipc_error.into());
-                    }
-                    ipc_channel::TryRecvError::Empty => break,
-                },
-            }
-        }
-        Ok(())
-    }
-
-    fn get_most_up_to_date_lines_to_draw(&mut self) -> Vec<DebugLine> {
-        let last_transfer_end = match self
-            .message_buffer
-            .iter()
-            .enumerate()
-            .rev()
-            .find(|m| *m.1 == Message::EndTransfer)
-        {
-            Some(m) => m,
-            None => return Vec::new(),
-        };
-        let last_transfer_start = match self
-            .message_buffer
-            .iter()
-            .enumerate()
-            .rev()
-            .find(|m| *m.1 == Message::StartTransfer && m.0 < last_transfer_end.0)
-        {
-            Some(m) => m,
-            None => panic!("End without a start"),
-        };
-        let messages: Vec<DebugLine> = self
-            .message_buffer
-            .iter()
-            .enumerate()
-            .filter(|m| m.0 > last_transfer_start.0 && m.0 < last_transfer_end.0)
-            .map(|m| m.1.clone())
-            .map(|m| match m {
-                Message::Line(debug_line) => debug_line,
-                Message::StartTransfer => panic!("Why are there start messages in my lines"),
-                Message::EndTransfer => panic!("Why are there end messages in my lines"),
-            })
-            .collect();
-        self.message_buffer.drain(0..last_transfer_start.0);
-        return messages;
-    }
-    fn convert_debug_lines_to_vertex_buffer(&mut self, lines: Vec<DebugLine>) {
+    fn convert_debug_lines_to_vertex_buffer(&mut self) {
+        let lines = &self.last_lines;
         if lines.len() == 0 {
             return;
         }

@@ -5,7 +5,7 @@ use std::{
 };
 
 use ipc_channel::ipc::{IpcOneShotServer, IpcSender};
-use ipc_types::{DebugLine, Message};
+use ipc_types::{DebugLine, Frame, Message};
 use rapier3d::{
     math::Vector,
     pipeline::{
@@ -77,8 +77,8 @@ impl DebugWindow {
         #[cfg(not(target_os = "windows"))]
         path.push("debug-window");
 
-        let (server, token) = IpcOneShotServer::<IpcSender<Message>>::new()
-            .expect("Failed to create one shot server");
+        let (server, token) =
+            IpcOneShotServer::<IpcSender<Frame>>::new().expect("Failed to create one shot server");
         let _child = Command::new(path)
             .arg(token)
             .spawn()
@@ -88,8 +88,31 @@ impl DebugWindow {
         let (tx, rx): (Sender<Message>, Receiver<Message>) = mpsc::channel();
         let handle = std::thread::spawn(move || {
             let rx = rx;
+            let mut line_buffer: Vec<DebugLine> = Vec::new();
+            let mut has_start = false;
             loop {
-                sender.send(rx.recv().unwrap()).unwrap();
+                let message = rx.recv().expect("Failed to receiver over channel");
+                match has_start {
+                    true => match message {
+                        Message::Line(debug_line) => line_buffer.push(debug_line),
+                        Message::StartTransfer => panic!("Duplicate start transfer messages"),
+                        Message::EndTransfer => {
+                            sender
+                                .send(Frame {
+                                    data: line_buffer.clone(),
+                                })
+                                .expect("Failed to send frame");
+                            line_buffer.clear();
+                            has_start = false;
+                        }
+                    },
+                    false => match message {
+                        Message::Line(_) => panic!("Debug line sent before start"),
+                        Message::StartTransfer => has_start = true,
+                        Message::EndTransfer => panic!("End before start"),
+                    },
+                }
+                // sender.send().unwrap();
             }
         });
         Self {

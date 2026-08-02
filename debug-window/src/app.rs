@@ -4,7 +4,7 @@ use std::{
 };
 
 use ipc_channel::ipc::IpcReceiver;
-use ipc_types::{FRAME_RATE, Message};
+use ipc_types::{FRAME_RATE, Frame, Message};
 use winit::{
     application::ApplicationHandler,
     event::{KeyEvent, StartCause, WindowEvent},
@@ -19,10 +19,10 @@ const FRAME_TIME: f32 = 1.0 / FRAME_RATE;
 pub struct App {
     state: Option<State>,
     render_target: Instant,
-    line_receiver: Arc<IpcReceiver<Message>>,
+    line_receiver: Arc<IpcReceiver<Frame>>,
 }
 impl App {
-    pub fn new(line_receiver: IpcReceiver<Message>) -> Self {
+    pub fn new(line_receiver: IpcReceiver<Frame>) -> Self {
         Self {
             state: None,
             render_target: Instant::now(),

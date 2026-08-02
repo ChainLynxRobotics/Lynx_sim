@@ -11,4 +11,9 @@ pub enum Message {
     EndTransfer,
 }
 
+#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
+pub struct Frame {
+    pub data: Vec<DebugLine>,
+}
+
 pub const FRAME_RATE: f32 = 60.0;
