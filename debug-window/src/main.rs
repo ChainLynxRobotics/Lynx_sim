@@ -37,5 +37,4 @@ pub fn main() {
     tx.send(sender).expect("send failed");
 
     _ = run(receiver).expect("Window failed to spawn");
-    println!("After close");
 }
