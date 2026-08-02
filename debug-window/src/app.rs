@@ -4,7 +4,7 @@ use std::{
 };
 
 use ipc_channel::ipc::IpcReceiver;
-use ipc_types::{FRAME_RATE, Frame, Message};
+use ipc_types::{FRAME_RATE, Frame};
 use winit::{
     application::ApplicationHandler,
     event::{KeyEvent, StartCause, WindowEvent},

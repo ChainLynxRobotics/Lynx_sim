@@ -3,7 +3,7 @@ use std::result::Result::Ok;
 
 use ipc_channel::ipc;
 use ipc_channel::ipc::{IpcReceiver, IpcSender};
-use ipc_types::{Frame, Message};
+use ipc_types::Frame;
 use winit::event_loop::ControlFlow;
 use winit::event_loop::EventLoop;
 
