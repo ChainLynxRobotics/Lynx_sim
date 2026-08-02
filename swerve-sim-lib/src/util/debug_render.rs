@@ -5,7 +5,7 @@ use std::{
 };
 
 use ipc_channel::ipc::{IpcOneShotServer, IpcSender};
-use ipc_types::{DebugLine, Frame, Message};
+use ipc_types::{DebugLine, Frame};
 use rapier3d::{
     math::Vector,
     pipeline::{
@@ -15,58 +15,73 @@ use rapier3d::{
 };
 
 use crate::physics_world::PhysicsWorld;
-fn convert_hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
-    // https://www.baeldung.com/cs/convert-color-hsl-rgb
-    let chroma = (1.0 - ((2.0 * hsla[2]) - 1.0).abs()) * hsla[1];
-    let h_prime = hsla[0] / 60.0;
-    let x = chroma * (1.0 - (h_prime.rem_euclid(2.0) - 1.0).abs());
-    if h_prime < 0.0 {
-        panic!("Hue out of valid range")
+fn hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
+    let h = hsla[0];
+    let s = hsla[1];
+    let l = hsla[2];
+    let a = hsla[3];
+    if s == 0.0 {
+        return (l, l, l, a);
     }
-    let color: (f32, f32, f32) = if h_prime < 1.0 {
-        (chroma, x, 0.0)
-    } else if h_prime < 2.0 {
-        (x, chroma, 0.0)
-    } else if h_prime < 3.0 {
-        (0.0, chroma, x)
-    } else if h_prime < 4.0 {
-        (0.0, x, chroma)
-    } else if h_prime < 5.0 {
-        (x, 0.0, chroma)
-    } else if h_prime <= 6.0 {
-        (chroma, 0.0, x)
-    } else {
-        panic!("Hue out of valid range")
-    };
-    let m = hsla[2] - (chroma / 2.0);
-    let color = (color.0 + m, color.1 + m, color.2 + m);
 
-    return (color.0, color.1, color.2, hsla[3]);
+    let q = if l < 0.5 {
+        l * (1.0 + s)
+    } else {
+        l + s - l * s
+    };
+    let p = 2.0 * l - q;
+
+    let r = hue_to_rgb(p, q, h / 360.0 + 1.0 / 3.0);
+    let g = hue_to_rgb(p, q, h / 360.0);
+    let b = hue_to_rgb(p, q, h / 360.0 - 1.0 / 3.0);
+
+    (r, g, b, a)
+}
+
+fn hue_to_rgb(p: f32, q: f32, t: f32) -> f32 {
+    let t = if t < 0.0 {
+        t + 1.0
+    } else if t > 1.0 {
+        t - 1.0
+    } else {
+        t
+    };
+
+    if t < 1.0 / 6.0 {
+        p + (q - p) * 6.0 * t
+    } else if t < 1.0 / 2.0 {
+        q
+    } else if t < 2.0 / 3.0 {
+        p + (q - p) * (2.0 / 3.0 - t) * 6.0
+    } else {
+        p
+    }
 }
 
 #[cfg(test)]
 mod hsla_test {
-    use crate::util::debug_render::convert_hsla_to_rgb;
+    use crate::util::debug_render::hsla_to_rgb;
 
     #[test]
     fn test_conversion() {
         assert_eq!(
-            convert_hsla_to_rgb([210.0, 0.79, 0.3, 0.5]),
-            (0.06299999, 0.3, 0.53700006, 0.5)
+            hsla_to_rgb([210.0, 0.79, 0.3, 0.5]),
+            (0.06299999, 0.3, 0.53700006, 0.5),
         );
         assert_eq!(
-            convert_hsla_to_rgb([124.444, 0.44628, 0.47451, 0.794]),
+            hsla_to_rgb([124.444, 0.44628, 0.47451, 0.794]),
             (0.26274568, 0.68627435, 0.294115, 0.794)
         );
         assert_eq!(
-            convert_hsla_to_rgb([38.0, 0.81768, 0.5612, 0.2]),
+            hsla_to_rgb([38.0, 0.81768, 0.5612, 0.2]),
             (0.919998, 0.6568795, 0.20240206, 0.2)
         );
     }
 }
 pub struct DebugWindow {
-    pub sender: Sender<Message>,
+    pub sender: Sender<Frame>,
     pub handle: JoinHandle<()>,
+    frame_buffer: Vec<DebugLine>,
 }
 impl DebugWindow {
     pub fn spawn_debug_window() -> Self {
@@ -85,48 +100,25 @@ impl DebugWindow {
             .expect("Failed to start window process");
         let (_rx, sender) = server.accept().expect("Accept failed");
 
-        let (tx, rx): (Sender<Message>, Receiver<Message>) = mpsc::channel();
+        let (tx, rx): (Sender<Frame>, Receiver<Frame>) = mpsc::channel();
         let handle = std::thread::spawn(move || {
             let rx = rx;
-            let mut line_buffer: Vec<DebugLine> = Vec::new();
-            let mut has_start = false;
             loop {
-                let message = rx.recv().expect("Failed to receiver over channel");
-                match has_start {
-                    true => match message {
-                        Message::Line(debug_line) => line_buffer.push(debug_line),
-                        Message::StartTransfer => panic!("Duplicate start transfer messages"),
-                        Message::EndTransfer => {
-                            sender
-                                .send(Frame {
-                                    data: line_buffer.clone(),
-                                })
-                                .expect("Failed to send frame");
-                            line_buffer.clear();
-                            has_start = false;
-                        }
-                    },
-                    false => match message {
-                        Message::Line(_) => panic!("Debug line sent before start"),
-                        Message::StartTransfer => has_start = true,
-                        Message::EndTransfer => panic!("End before start"),
-                    },
-                }
-                // sender.send().unwrap();
+                sender
+                    .send(rx.recv().expect("Failed to receive frame on render thread"))
+                    .expect("Failed to send frame");
             }
         });
         Self {
             sender: tx,
             handle: handle,
+            frame_buffer: Vec::new(),
         }
     }
 
     pub fn render(&mut self, physics_world: &PhysicsWorld) {
         let mut render =
             DebugRenderPipeline::new(DebugRenderStyle::default(), DebugRenderMode::default());
-        self.sender
-            .send(Message::StartTransfer)
-            .expect("Failed to send start transfer");
         render.render(
             self,
             &physics_world.rigid_body_set,
@@ -136,18 +128,19 @@ impl DebugWindow {
             &physics_world.narrow_phase,
         );
         self.sender
-            .send(Message::EndTransfer)
-            .expect("Failed to send end transfer");
+            .send(Frame {
+                data: self.frame_buffer.clone(),
+            })
+            .expect("Failed to send frame");
+        self.frame_buffer.clear();
     }
 }
 impl DebugRenderBackend for DebugWindow {
     fn draw_line(&mut self, _object: DebugRenderObject, a: Vector, b: Vector, color: DebugColor) {
-        self.sender
-            .send(Message::Line(DebugLine {
-                point1: (a.x, a.y, a.z),
-                point2: (b.x, b.y, b.z),
-                color: convert_hsla_to_rgb(color),
-            }))
-            .expect("Line failed to send");
+        self.frame_buffer.push(DebugLine {
+            point1: (a.x, a.y, a.z),
+            point2: (b.x, b.y, b.z),
+            color: hsla_to_rgb(color),
+        });
     }
 }
