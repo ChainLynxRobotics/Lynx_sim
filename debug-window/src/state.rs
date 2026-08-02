@@ -211,7 +211,10 @@ impl State {
 
         match self.message_receiver.try_recv() {
             Ok(frame) => self.last_lines = frame.data,
-            Err(_) => (),
+            Err(e) => match e {
+                ipc_channel::TryRecvError::IpcError(ipc_error) => return Err(ipc_error.into()),
+                ipc_channel::TryRecvError::Empty => (),
+            },
         };
         self.convert_debug_lines_to_vertex_buffer();
 
