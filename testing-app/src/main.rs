@@ -21,51 +21,58 @@ use swerve_sim_3d::{
     },
     util::debug_render::DebugWindow,
 };
-pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(250.0, Hz, f32);
+pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(500.0, Hz, f32);
 pub const SIMULATION_TIMESTEP: unit!(s, f32) =
     quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
-pub const SUB_STEPS: u32 = 5;
+pub const SUB_STEPS: u32 = 10;
 
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
 
-    let robot = Robot::new(
-        Pose3::IDENTITY,
-        rescale!(quantity!(34.5, inch, f32), m, f32),
-        rescale!(quantity!(34.5, inch, f32), m, f32),
-        quantity!(0.11, m, f32),
-        quantity!(0.01, m, f32),
-        quantity!(50.0, kg, f32),
-        Vec3::ZERO,
-        Vec3::ONE,
-        generate_mk4i_swerve_config(L2Plus, Billet),
-        [
-            (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
-            (quantity!(0.28, m, f32), (quantity!(-0.28, m, f32))),
-            (quantity!(-0.28, m, f32), (quantity!(0.28, m, f32))),
-            (quantity!(-0.28, m, f32), (quantity!(-0.28, m, f32))),
-        ],
-        &mut physics_world,
-    );
-    let robot2 = Robot::new(
-        Pose3::from_translation(Vec3::new(1.0, 1.0, 0.0)),
-        rescale!(quantity!(34.5, inch, f32), m, f32),
-        rescale!(quantity!(34.5, inch, f32), m, f32),
-        quantity!(0.11, m, f32),
-        quantity!(0.01, m, f32),
-        quantity!(50.0, kg, f32),
-        Vec3::ZERO,
-        Vec3::ONE,
-        generate_mk4i_swerve_config(L2Plus, Billet),
-        [
-            (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
-            (quantity!(0.28, m, f32), (quantity!(-0.28, m, f32))),
-            (quantity!(-0.28, m, f32), (quantity!(0.28, m, f32))),
-            (quantity!(-0.28, m, f32), (quantity!(-0.28, m, f32))),
-        ],
-        &mut physics_world,
-    );
+    let robots: Vec<Robot<_>> = (0..6)
+        .map(|_| {
+            Robot::new(
+                Pose3::IDENTITY.append_translation(Vec3::new(
+                    rand::random_range(-5.0..5.0),
+                    rand::random_range(-5.0..5.0),
+                    0.0,
+                )),
+                rescale!(quantity!(34.5, inch, f32), m, f32),
+                rescale!(quantity!(34.5, inch, f32), m, f32),
+                quantity!(0.11, m, f32),
+                quantity!(0.01, m, f32),
+                quantity!(50.0, kg, f32),
+                Vec3::ZERO,
+                Vec3::ONE,
+                generate_mk4i_swerve_config(L2Plus, Billet),
+                [
+                    (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
+                    (quantity!(0.28, m, f32), (quantity!(-0.28, m, f32))),
+                    (quantity!(-0.28, m, f32), (quantity!(0.28, m, f32))),
+                    (quantity!(-0.28, m, f32), (quantity!(-0.28, m, f32))),
+                ],
+                &mut physics_world,
+            )
+        })
+        .collect();
+
+    for _ in 0..500 {
+        let rb = physics_world
+            .rigid_body_set
+            .insert(
+                RigidBodyBuilder::dynamic().pose(Pose3::from_translation(Vec3::new(
+                    rand::random_range(-9.0..9.0),
+                    rand::random_range(-9.0..9.0),
+                    0.1,
+                ))),
+            );
+        physics_world.collider_set.insert_with_parent(
+            ColliderBuilder::ball(0.075),
+            rb,
+            &mut physics_world.rigid_body_set,
+        );
+    }
 
     let ground = RigidBodyBuilder::fixed()
         .translation(Vector::new(0.0, 0.0, -1.0))
@@ -86,21 +93,15 @@ fn main() {
     loop {
         let start_time = Instant::now();
         for _ in 0..SUB_STEPS {
-            robot.modules.iter().for_each(|module| {
-                module.apply_voltages(
-                    quantity!(5.0, volt, f32),
-                    quantity!(5.0, volt, f32),
-                    SIMULATION_TIMESTEP,
-                    &mut physics_world,
-                );
-            });
-            robot2.modules.iter().for_each(|module| {
-                module.apply_voltages(
-                    quantity!(5.0, volt, f32),
-                    quantity!(5.0, volt, f32),
-                    SIMULATION_TIMESTEP,
-                    &mut physics_world,
-                );
+            robots.iter().for_each(|r| {
+                r.modules.iter().for_each(|module| {
+                    module.apply_voltages(
+                        quantity!(5.0, volt, f32),
+                        quantity!(5.0, volt, f32),
+                        SIMULATION_TIMESTEP,
+                        &mut physics_world,
+                    );
+                })
             });
             physics_world.step();
         }
@@ -110,7 +111,7 @@ fn main() {
         }
         let processing_time = start_time.elapsed();
         if tracking % 50 == 0 {
-            // println!("processing time: {:?}", processing_time);
+            println!("processing time: {:?}", processing_time);
             println!("loop overuns: {}", loop_overuns);
         }
         tracking += 1;
