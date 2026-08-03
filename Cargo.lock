@@ -1722,9 +1722,9 @@ dependencies = [
 
 [[package]]
 name = "parry3d"
-version = "0.29.0"
+version = "0.30.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42cb0f1726c9fa25cad2583862ed86a3beee3a9b1f9fbe1fac8518615e778903"
+checksum = "e5428b70bd77107cf8837b29cebc64585381a4e3bd9735ed996d08f16bb86b13"
 dependencies = [
  "approx 0.5.1",
  "arrayvec",
@@ -1985,10 +1985,11 @@ checksum = "ca45419789ae5a7899559e9512e58ca889e41f04f1f2445e9f4b290ceccd1d08"
 
 [[package]]
 name = "rapier3d"
-version = "0.34.0"
-source = "git+https://github.com/me-it-is/rapier?branch=last-update#2ed9e414d31756fb5bd0c3fdf7e382f0c6240565"
+version = "0.35.0-beta.0"
+source = "git+https://github.com/me-it-is/rapier#d88f2a23089ab1ce6cd95adcc316f18d632a73c2"
 dependencies = [
  "approx 0.5.1",
+ "arrayvec",
  "bitflags 2.11.0",
  "glamx",
  "log",
@@ -2259,9 +2260,9 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 
 [[package]]
 name = "simba"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f45c644a9f3a386f9288625d9f0c1e999e1acf07a37df35d0516c7f199d9cb2"
+checksum = "834a9952211d4a60ff10ac1d20cc01640a75bdc0a0c688d62f359ea7d17459f3"
 dependencies = [
  "approx 0.5.1",
  "num-complex",
@@ -3081,9 +3082,9 @@ dependencies = [
 
 [[package]]
 name = "wide"
-version = "1.5.0"
+version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfdfe6a32973f2d1b268b8895845a8a96cac2f0191e72c27cc929036060dbf89"
+checksum = "be99e8317aa9f08e7d16e13033ca43faab59ab582b1d0feab7b385424c42f8b1"
 dependencies = [
  "bytemuck",
  "safe_arch",
