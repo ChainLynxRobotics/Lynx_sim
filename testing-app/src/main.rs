@@ -7,10 +7,7 @@ use ipc_types::FRAME_RATE;
 use whippyunits::{quantity, rescale, unit, value};
 
 use rapier3d::{
-    dynamics::RigidBodyBuilder,
-    geometry::ColliderBuilder,
-    math::{Vector},
-    prelude::Pose,
+    dynamics::RigidBodyBuilder, geometry::ColliderBuilder, math::Vector, prelude::Pose,
 };
 use swerve_sim_3d::{
     FIELD_INTERACTION_GROUPS,
