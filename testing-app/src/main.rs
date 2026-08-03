@@ -24,7 +24,7 @@ pub const SIMULATION_TIMESTEP: unit!(s, f32) =
 pub const SUB_STEPS: u32 = 10;
 
 fn main() {
-    let mut window = DebugWindow::spawn_debug_window();
+    // let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
 
     let robots: Vec<Robot<_>> = (0..1)
@@ -101,7 +101,7 @@ fn main() {
             physics_world.step();
         }
         if (last_draw + Duration::from_secs_f32(1.0 / FRAME_RATE)) <= Instant::now() {
-            window.render(&physics_world);
+            // window.render(&physics_world);
             last_draw = Instant::now();
         }
         let processing_time = start_time.elapsed();
@@ -109,16 +109,16 @@ fn main() {
             // println!("processing time: {:?}", processing_time);
             // println!("loop overuns: {}", loop_overuns);
         }
-        tracking += 1;
-        if processing_time
-            <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
-        {
-            thread::sleep(
-                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
-                    - processing_time,
-            );
-        } else {
-            loop_overuns += 1;
-        }
+        // tracking += 1;
+        // if processing_time
+        //     <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
+        // {
+        //     thread::sleep(
+        //         Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
+        //             - processing_time,
+        //     );
+        // } else {
+        //     loop_overuns += 1;
+        // }
     }
 }
