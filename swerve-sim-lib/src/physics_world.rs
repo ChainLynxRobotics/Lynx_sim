@@ -1,5 +1,5 @@
 use rapier3d::{
-    math::Vec3,
+    math::Vector,
     prelude::{
         BroadPhaseBvh, CCDSolver, ColliderSet, DefaultBroadPhase, ImpulseJointSet,
         IntegrationParameters, IslandManager, MultibodyJointSet, NarrowPhase, PhysicsPipeline,
@@ -10,7 +10,7 @@ use whippyunits::{quantity, unit, value};
 
 pub struct PhysicsWorld {
     pub physics_pipeline: PhysicsPipeline,
-    pub gravity: Vec3,
+    pub gravity: Vector,
     pub integration_parameters: IntegrationParameters,
     pub island_manager: IslandManager,
     pub broad_phase: BroadPhaseBvh,
@@ -33,7 +33,7 @@ impl PhysicsWorld {
 
         return PhysicsWorld {
             physics_pipeline: PhysicsPipeline::new(),
-            gravity: Vec3::new(0.0, 0.0, -9.80665),
+            gravity: Vector::new(0.0, 0.0, -9.80665),
             integration_parameters: integration_parameters,
             island_manager: IslandManager::new(),
             broad_phase: DefaultBroadPhase::new(),

@@ -9,8 +9,8 @@ use whippyunits::{quantity, rescale, unit, value};
 use rapier3d::{
     dynamics::RigidBodyBuilder,
     geometry::ColliderBuilder,
-    math::{Vec3, Vector},
-    prelude::Pose3,
+    math::{Vector},
+    prelude::Pose,
 };
 use swerve_sim_3d::{
     FIELD_INTERACTION_GROUPS,
@@ -33,7 +33,7 @@ fn main() {
     let robots: Vec<Robot<_>> = (0..6)
         .map(|_| {
             Robot::new(
-                Pose3::IDENTITY.append_translation(Vec3::new(
+                Pose::IDENTITY.append_translation(Vector::new(
                     rand::random_range(-5.0..5.0),
                     rand::random_range(-5.0..5.0),
                     0.0,
@@ -43,8 +43,8 @@ fn main() {
                 quantity!(0.11, m, f32),
                 quantity!(0.01, m, f32),
                 quantity!(50.0, kg, f32),
-                Vec3::ZERO,
-                Vec3::ONE,
+                Vector::ZERO,
+                Vector::ONE,
                 generate_mk4i_swerve_config(L2Plus, Billet),
                 [
                     (quantity!(0.28, m, f32), (quantity!(0.28, m, f32))),
@@ -61,7 +61,7 @@ fn main() {
         let rb = physics_world
             .rigid_body_set
             .insert(
-                RigidBodyBuilder::dynamic().pose(Pose3::from_translation(Vec3::new(
+                RigidBodyBuilder::dynamic().pose(Pose::from_translation(Vector::new(
                     rand::random_range(-9.0..9.0),
                     rand::random_range(-9.0..9.0),
                     0.1,

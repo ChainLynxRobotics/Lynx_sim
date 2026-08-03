@@ -1,9 +1,9 @@
 use std::f32::consts::PI;
 
 use rapier3d::dynamics::{ImpulseJointSet, RigidBody};
-use rapier3d::math::{AngVector, Pose3};
+use rapier3d::math::{AngVector, Pose};
 use rapier3d::{
-    math::{Vec3, Vector},
+    math::{Vector},
     prelude::{
         ColliderBuilder, ColliderSet, MassProperties, RevoluteJointBuilder, RigidBodyBuilder,
         RigidBodyHandle, RigidBodySet,
@@ -31,7 +31,7 @@ impl SwerveModule {
     pub fn new(
         config: SwerveModuleConfig,
         module_center: Vector,
-        drive_base_position: Pose3,
+        drive_base_position: Pose,
         drive_base: RigidBodyHandle,
         rigid_body_set: &mut RigidBodySet,
         collider_set: &mut ColliderSet,
@@ -39,7 +39,7 @@ impl SwerveModule {
     ) -> Self {
         let azumith = RigidBodyBuilder::dynamic()
             .pose(drive_base_position.prepend_translation(
-                module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             ))
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
@@ -47,16 +47,16 @@ impl SwerveModule {
             value!(config.azumith_radius, m, f32),
         )
         .mass_properties(MassProperties::new(
-            Vec3::ZERO,
+            Vector::ZERO,
             value!(config.azumith_mass, kg, f32),
-            Vec3::new(
+            Vector::new(
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
                 value!(config.azumith_moi, kg * m ^ 2, f32),
                 value!(config.azumith_secondary_moi, kg * m ^ 2, f32),
             ),
         ))
         .collision_groups(SWERVE_INTERACTION_GROUPS)
-        .rotation(Vec3::new(PI / 2.0, 0.0, 0.0))
+        .rotation(Vector::new(PI / 2.0, 0.0, 0.0))
         .restitution(0.0)
         .build();
         let azumith = rigid_body_set.insert(azumith);
@@ -64,7 +64,7 @@ impl SwerveModule {
 
         let wheel = RigidBodyBuilder::dynamic()
             .pose(drive_base_position.prepend_translation(
-                module_center + Vec3::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+                module_center + Vector::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             ))
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
@@ -74,9 +74,9 @@ impl SwerveModule {
         .friction(config.wheel_cof)
         .restitution(config.wheel_coefficient_of_restetution)
         .mass_properties(MassProperties::new(
-            Vec3::ZERO,
+            Vector::ZERO,
             value!(config.wheel_mass, kg, f32),
-            Vec3::new(
+            Vector::new(
                 value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
                 value!(config.drive_moi, kg * m ^ 2, f32),
                 value!(config.wheel_secondary_moi, kg * m ^ 2, f32),
@@ -87,17 +87,17 @@ impl SwerveModule {
         let wheel = rigid_body_set.insert(wheel);
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
 
-        let azumith_joint = RevoluteJointBuilder::new(Vec3::Z)
-            .local_anchor1(Vec3::ZERO)
+        let azumith_joint = RevoluteJointBuilder::new(Vector::Z)
+            .local_anchor1(Vector::ZERO)
             .local_anchor2(
-                module_center + Vec3::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+                module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
             .build();
         joint_set.insert(azumith, drive_base, azumith_joint, true);
 
-        let wheel_joint = RevoluteJointBuilder::new(Vec3::Y)
-            .local_anchor1(Vec3::ZERO)
-            .local_anchor2(Vec3::new(
+        let wheel_joint = RevoluteJointBuilder::new(Vector::Y)
+            .local_anchor1(Vector::ZERO)
+            .local_anchor2(Vector::new(
                 0.0,
                 0.0,
                 value!(
@@ -133,7 +133,7 @@ impl SwerveModule {
             drive_motor,
             drive,
             wheel,
-            Vec3::Y,
+            Vector::Y,
             self.config.drive_gear_ratio,
             dt,
         );
@@ -146,7 +146,7 @@ impl SwerveModule {
             turn_motor,
             turn,
             azumith,
-            Vec3::Z,
+            Vector::Z,
             self.config.turn_gear_ratio,
             dt,
         );
@@ -156,7 +156,7 @@ impl SwerveModule {
         motor: Motor,
         voltage: unit!(volt, f32),
         rb: &mut RigidBody,
-        rotation_axis: Vec3,
+        rotation_axis: Vector,
         gear_ratio: f32,
         dt: unit!(s, f32),
     ) {
@@ -164,7 +164,7 @@ impl SwerveModule {
         rb.reset_torques(false);
 
         let speeds: AngVector =
-            Pose3::from_parts(Vec3::ZERO, rb.position().rotation).inverse() * rb.angvel();
+            Pose::from_parts(Vector::ZERO, rb.position().rotation).inverse() * rb.angvel();
         let speed = speeds.dot(rotation_axis);
         let speed = speed * gear_ratio;
         let speed = quantity!(speed, radian / s, f32);
@@ -185,7 +185,7 @@ impl SwerveModule {
 
         let calculated_torque = rotation_axis * value!(torque.into(), Nm, f32);
         let calculated_torque =
-            Pose3::from_parts(Vec3::ZERO, rb.position().rotation) * calculated_torque;
+            Pose::from_parts(Vector::ZERO, rb.position().rotation) * calculated_torque;
 
         rb.add_torque(calculated_torque, true);
     }

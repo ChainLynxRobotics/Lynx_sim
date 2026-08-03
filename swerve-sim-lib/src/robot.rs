@@ -5,7 +5,7 @@ use crate::{
 use rapier3d::{
     dynamics::{MassProperties, RigidBodyBuilder},
     geometry::ColliderBuilder,
-    math::{Pose3, Vec3},
+    math::{Pose, Vector},
     prelude::RigidBodyHandle,
 };
 use whippyunits::{quantity, unit, value};
@@ -16,14 +16,14 @@ pub struct Robot<const NUMBER_OF_SWERVE_MODULES: usize> {
 }
 impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
     pub fn new(
-        starting_position: Pose3,
+        starting_position: Pose,
         width: unit!(m, f32),
         height: unit!(m, f32),
         bumper_height: unit!(m, f32),
         cornner_radius: unit!(m, f32),
         mass: unit!(kg, f32),
-        center_of_mass: Vec3,
-        moments_of_inertia: Vec3,
+        center_of_mass: Vector,
+        moments_of_inertia: Vector,
         module_config: SwerveModuleConfig,
         module_locations: [(unit!(m, f32), unit!(m, f32)); NUMBER_OF_SWERVE_MODULES],
         physics_world: &mut physics_world::PhysicsWorld,
@@ -33,7 +33,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
             m,
             f32
         );
-        let drive_base_pose = starting_position.append_translation(Vec3::Z * drive_base_height);
+        let drive_base_pose = starting_position.append_translation(Vector::Z * drive_base_height);
         let drive_base = RigidBodyBuilder::dynamic().pose(drive_base_pose).build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
@@ -56,7 +56,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
         let drive_base_collider = drive_base_collider
             .collision_groups(BUMPER_INTERACTION_GROUPS)
             .mass_properties(MassProperties::new(
-                center_of_mass - Vec3::Z * drive_base_height,
+                center_of_mass - Vector::Z * drive_base_height,
                 value!(
                     mass - (module_config.azumith_mass + module_config.wheel_mass),
                     kg,
@@ -75,7 +75,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
         let modules = module_locations.map(|location| {
             SwerveModule::new(
                 module_config,
-                Vec3::new(
+                Vector::new(
                     value!(location.0, m, f32),
                     value!(location.1, m, f32),
                     value!(-bumper_height / 2.0, m, f32),

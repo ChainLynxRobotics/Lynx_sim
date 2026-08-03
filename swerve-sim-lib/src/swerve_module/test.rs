@@ -2,7 +2,7 @@
 mod test {
     use std::random::random;
 
-    use rapier3d::math::{DEFAULT_EPSILON, Pose, Pose3};
+    use rapier3d::math::{DEFAULT_EPSILON, Pose};
     use rapier3d::prelude::LockedAxes;
 
     use crate::physics_world;
@@ -17,7 +17,7 @@ mod test {
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         _ = SwerveModule::new(
             generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-            Vec3 {
+            Vector {
                 x: 0.0,
                 y: 0.0,
                 z: 0.0,
@@ -37,7 +37,7 @@ mod test {
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         let swerve_module = SwerveModule::new(
             generate_mk4i_swerve_config(Mk4iGearRatio::L2Plus, Mk4iWheel::Billet),
-            Vec3 {
+            Vector {
                 x: 0.0,
                 y: 0.0,
                 z: 0.0,
@@ -78,7 +78,7 @@ mod test {
         println!("{}", azumith.angvel());
         println!("{:?}", azumith.position());
         azumith.add_torque(
-            Vec3 {
+            Vector {
                 x: 0.0,
                 y: 0.0,
                 z: 1.0,
@@ -97,7 +97,7 @@ mod test {
 
     #[test]
     fn test_inverse() {
-        let pose = Pose::new(Vec3::ZERO, AngVector::ZERO);
+        let pose = Pose::new(Vector::ZERO, AngVector::ZERO);
         let inverse = pose.inverse();
         for _ in 0..10000 {
             let x: i32 = random(..);
@@ -105,28 +105,28 @@ mod test {
             let z: i32 = random(..);
             assert_eq!(
                 inverse
-                    * Vec3 {
+                    * Vector {
                         x: x as f32,
                         y: y as f32,
                         z: z as f32
                     },
-                Vec3 {
+                Vector {
                     x: x as f32,
                     y: y as f32,
                     z: z as f32
                 }
             );
         }
-        let pose = Pose::new(Vec3::X, AngVector::ZERO);
+        let pose = Pose::new(Vector::X, AngVector::ZERO);
         let inverse = pose.inverse();
         assert_eq!(
             inverse
-                * Vec3 {
+                * Vector {
                     x: 1.0,
                     y: 0.0,
                     z: 0.0
                 },
-            Vec3 {
+            Vector {
                 x: 0.0,
                 y: 0.0,
                 z: 0.0
@@ -134,12 +134,12 @@ mod test {
         );
         assert_eq!(
             inverse
-                * Vec3 {
+                * Vector {
                     x: 0.0,
                     y: 1.0,
                     z: 0.0
                 },
-            Vec3 {
+            Vector {
                 x: -1.0,
                 y: 1.0,
                 z: 0.0
@@ -147,30 +147,30 @@ mod test {
         );
         assert_eq!(
             inverse
-                * Vec3 {
+                * Vector {
                     x: 0.0,
                     y: 0.0,
                     z: 1.0
                 },
-            Vec3 {
+            Vector {
                 x: -1.0,
                 y: 0.0,
                 z: 1.0
             }
         );
-        let pose = Pose3::new(Vec3::ZERO, Vec3::Z * PI * 0.5);
+        let pose = Pose::new(Vector::ZERO, Vector::Z * PI * 0.5);
         let inverse = pose.inverse();
         assert_eq!(
-            (inverse * Pose3::IDENTITY).translation,
-            (Pose3::IDENTITY).translation
+            (inverse * Pose::IDENTITY).translation,
+            (Pose::IDENTITY).translation
         );
         assert!(are_poses_approx_eq(
-            inverse * Pose3::new(Vec3::X, Vec3::ZERO),
-            Pose3::new(Vec3::Y * -1.0, Vec3::Z * PI * -0.5)
+            inverse * Pose::new(Vector::X, Vector::ZERO),
+            Pose::new(Vector::Y * -1.0, Vector::Z * PI * -0.5)
         ));
     }
 
-    fn are_poses_approx_eq(pose1: Pose3, pose2: Pose3) -> bool {
+    fn are_poses_approx_eq(pose1: Pose, pose2: Pose) -> bool {
         return approx_eq(pose1.translation.x, pose2.translation.x)
             && approx_eq(pose1.translation.y, pose2.translation.y)
             && approx_eq(pose1.translation.z, pose2.translation.z)
