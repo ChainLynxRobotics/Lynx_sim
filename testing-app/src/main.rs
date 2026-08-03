@@ -27,14 +27,10 @@ fn main() {
     let mut window = DebugWindow::spawn_debug_window();
     let mut physics_world = PhysicsWorld::new(SIMULATION_TIMESTEP);
 
-    let robots: Vec<Robot<_>> = (0..6)
+    let robots: Vec<Robot<_>> = (0..1)
         .map(|_| {
             Robot::new(
-                Pose::IDENTITY.append_translation(Vector::new(
-                    rand::random_range(-5.0..5.0),
-                    rand::random_range(-5.0..5.0),
-                    0.0,
-                )),
+                Pose::IDENTITY.append_translation(Vector::new(0.0, 0.0, 0.0)),
                 rescale!(quantity!(34.5, inch, f32), m, f32),
                 rescale!(quantity!(34.5, inch, f32), m, f32),
                 quantity!(0.11, m, f32),
@@ -54,21 +50,23 @@ fn main() {
         })
         .collect();
 
-    for _ in 0..500 {
-        let rb = physics_world
-            .rigid_body_set
-            .insert(
-                RigidBodyBuilder::dynamic().pose(Pose::from_translation(Vector::new(
-                    rand::random_range(-9.0..9.0),
-                    rand::random_range(-9.0..9.0),
-                    0.1,
-                ))),
+    for i in 0..=21 {
+        for j in 0..=21 {
+            let rb = physics_world
+                .rigid_body_set
+                .insert(
+                    RigidBodyBuilder::dynamic().pose(Pose::from_translation(Vector::new(
+                        (((i as f32) - 10.5) / 10.5) * 4.0,
+                        (((j as f32) - 10.5) / 10.5) * 4.0,
+                        0.1,
+                    ))),
+                );
+            physics_world.collider_set.insert_with_parent(
+                ColliderBuilder::ball(0.075),
+                rb,
+                &mut physics_world.rigid_body_set,
             );
-        physics_world.collider_set.insert_with_parent(
-            ColliderBuilder::ball(0.075),
-            rb,
-            &mut physics_world.rigid_body_set,
-        );
+        }
     }
 
     let ground = RigidBodyBuilder::fixed()
@@ -87,7 +85,7 @@ fn main() {
     let mut tracking = 0;
     let mut loop_overuns = 0;
     let mut last_draw = Instant::now();
-    loop {
+    for _ in 0..1000 {
         let start_time = Instant::now();
         for _ in 0..SUB_STEPS {
             robots.iter().for_each(|r| {
@@ -108,8 +106,8 @@ fn main() {
         }
         let processing_time = start_time.elapsed();
         if tracking % 50 == 0 {
-            println!("processing time: {:?}", processing_time);
-            println!("loop overuns: {}", loop_overuns);
+            // println!("processing time: {:?}", processing_time);
+            // println!("loop overuns: {}", loop_overuns);
         }
         tracking += 1;
         if processing_time
