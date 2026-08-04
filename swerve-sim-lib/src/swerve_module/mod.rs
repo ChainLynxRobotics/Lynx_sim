@@ -61,6 +61,11 @@ impl SwerveModule {
         .restitution(0.0)
         .build();
         let azumith = rigid_body_set.insert(azumith);
+        {
+            let azumith_real = rigid_body_set.get_mut(azumith).unwrap();
+            let activation = azumith_real.activation_mut();
+            activation.normalized_linear_threshold = 0.4;
+        }
         collider_set.insert_with_parent(azumith_colider, azumith, rigid_body_set);
 
         let wheel = RigidBodyBuilder::dynamic()
@@ -87,6 +92,11 @@ impl SwerveModule {
         .collision_groups(SWERVE_INTERACTION_GROUPS)
         .build();
         let wheel = rigid_body_set.insert(wheel);
+        {
+            let wheel_real = rigid_body_set.get_mut(wheel).unwrap();
+            let activation = wheel_real.activation_mut();
+            activation.normalized_linear_threshold = 0.4;
+        }
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
 
         let azumith_joint = RevoluteJointBuilder::new(Vector::Z)

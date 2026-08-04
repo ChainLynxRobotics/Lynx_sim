@@ -39,6 +39,11 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
             .gyroscopic_forces_enabled(false)
             .build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
+        {
+            let drive_base_real = physics_world.rigid_body_set.get_mut(drive_base).unwrap();
+            let activation = drive_base_real.activation_mut();
+            activation.normalized_linear_threshold = 0.4;
+        }
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
             // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference
             // see https://rapier.rs/docs/user_guides/rust/colliders#round-shapes
