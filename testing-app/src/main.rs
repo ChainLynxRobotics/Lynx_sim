@@ -61,6 +61,9 @@ fn main() {
                     )))
                     .gyroscopic_forces_enabled(false),
             );
+            let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
+            let activation = rb_real.activation_mut();
+            activation.normalized_linear_threshold = 0.4;
             physics_world.collider_set.insert_with_parent(
                 ColliderBuilder::ball(0.075),
                 rb,
