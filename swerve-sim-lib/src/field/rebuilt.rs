@@ -1,6 +1,6 @@
 use rapier3d::dynamics::{RigidBodyBuilder, RigidBodyHandle};
 use rapier3d::geometry::ColliderBuilder;
-use rapier3d::math::{Pose3, Vector};
+use rapier3d::math::{Pose, Vector};
 use whippyunits::{quantity, rescale, unit, value};
 
 use crate::field::Field;
@@ -23,7 +23,7 @@ impl Field for RebuiltField {
             value!(HEIGHT / 2.0, m, f32),
             1.0,
         )
-        .position(Pose3::from_translation(Vector::NEG_Z));
+        .position(Pose::from_translation(Vector::NEG_Z));
         physics_world.collider_set.insert_with_parent(
             ground_collider,
             field,
