@@ -52,15 +52,15 @@ fn main() {
 
     for i in 0..=21 {
         for j in 0..=21 {
-            let rb = physics_world
-                .rigid_body_set
-                .insert(
-                    RigidBodyBuilder::dynamic().pose(Pose::from_translation(Vector::new(
+            let rb = physics_world.rigid_body_set.insert(
+                RigidBodyBuilder::dynamic()
+                    .pose(Pose::from_translation(Vector::new(
                         (((i as f32) - 10.5) / 10.5) * 4.0,
                         (((j as f32) - 10.5) / 10.5) * 4.0,
                         0.1,
-                    ))),
-                );
+                    )))
+                    .gyroscopic_forces_enabled(false),
+            );
             physics_world.collider_set.insert_with_parent(
                 ColliderBuilder::ball(0.075),
                 rb,

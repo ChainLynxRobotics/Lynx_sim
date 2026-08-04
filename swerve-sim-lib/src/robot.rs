@@ -34,7 +34,10 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
             f32
         );
         let drive_base_pose = starting_position.append_translation(Vector::Z * drive_base_height);
-        let drive_base = RigidBodyBuilder::dynamic().pose(drive_base_pose).build();
+        let drive_base = RigidBodyBuilder::dynamic()
+            .pose(drive_base_pose)
+            .gyroscopic_forces_enabled(false)
+            .build();
         let drive_base = physics_world.rigid_body_set.insert(drive_base);
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
             // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference

@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use rapier3d::dynamics::{ImpulseJointSet, RigidBody};
 use rapier3d::math::{AngVector, Pose};
 use rapier3d::{
-    math::{Vector},
+    math::Vector,
     prelude::{
         ColliderBuilder, ColliderSet, MassProperties, RevoluteJointBuilder, RigidBodyBuilder,
         RigidBodyHandle, RigidBodySet,
@@ -41,6 +41,7 @@ impl SwerveModule {
             .pose(drive_base_position.prepend_translation(
                 module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             ))
+            .gyroscopic_forces_enabled(false)
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
             value!(config.azumith_thickness, m, f32) / 2.0,
@@ -66,6 +67,7 @@ impl SwerveModule {
             .pose(drive_base_position.prepend_translation(
                 module_center + Vector::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
             ))
+            .gyroscopic_forces_enabled(false)
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
             value!(config.wheel_width, m, f32) / 2.0,
