@@ -1,6 +1,7 @@
 #![feature(random)]
 use rapier3d::geometry::{Group, InteractionGroups, InteractionTestMode::Or};
 
+pub mod field;
 pub mod physics_world;
 pub mod robot;
 pub mod swerve_module;
