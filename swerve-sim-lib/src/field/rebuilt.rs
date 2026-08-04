@@ -29,8 +29,32 @@ impl Field for RebuiltField {
             field,
             &mut physics_world.rigid_body_set,
         );
-
-        Box::new(RebuiltField {})
+        // TODO: account for preloaded fuel
+        // see 6.3.4 SCORING ELEMENTS https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
+        let mut fuel: Vec<RigidBodyHandle> = Vec::with_capacity(408);
+        for i in 0..=21 {
+            for j in 0..=21 {
+                let rb = physics_world.rigid_body_set.insert(
+                    RigidBodyBuilder::dynamic()
+                        .pose(Pose::from_translation(Vector::new(
+                            (((i as f32) - 10.5) / 10.5) * 4.0,
+                            (((j as f32) - 10.5) / 10.5) * 4.0,
+                            0.1,
+                        )))
+                        .gyroscopic_forces_enabled(false),
+                );
+                fuel.push(rb);
+                let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
+                let activation = rb_real.activation_mut();
+                activation.normalized_linear_threshold = 0.4;
+                physics_world.collider_set.insert_with_parent(
+                    ColliderBuilder::ball(0.075),
+                    rb,
+                    &mut physics_world.rigid_body_set,
+                );
+            }
+        }
+        Box::new(RebuiltField { fuel })
     }
 
     fn update(&mut self, physics_world: &mut PhysicsWorld) {

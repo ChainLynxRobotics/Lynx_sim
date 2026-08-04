@@ -11,6 +11,7 @@ use rapier3d::{
 };
 use swerve_sim_3d::{
     FIELD_INTERACTION_GROUPS,
+    field::{Field, rebuilt::RebuiltField},
     physics_world::PhysicsWorld,
     robot::Robot,
     swerve_module::default_configs::{
@@ -50,41 +51,8 @@ fn main() {
         })
         .collect();
 
-    for i in 0..=21 {
-        for j in 0..=21 {
-            let rb = physics_world.rigid_body_set.insert(
-                RigidBodyBuilder::dynamic()
-                    .pose(Pose::from_translation(Vector::new(
-                        (((i as f32) - 10.5) / 10.5) * 4.0,
-                        (((j as f32) - 10.5) / 10.5) * 4.0,
-                        0.1,
-                    )))
-                    .gyroscopic_forces_enabled(false),
-            );
-            let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
-            let activation = rb_real.activation_mut();
-            activation.normalized_linear_threshold = 0.4;
-            physics_world.collider_set.insert_with_parent(
-                ColliderBuilder::ball(0.075),
-                rb,
-                &mut physics_world.rigid_body_set,
-            );
-        }
-    }
+    RebuiltField::new(&mut physics_world);
 
-    let ground = RigidBodyBuilder::fixed()
-        .translation(Vector::new(0.0, 0.0, -1.0))
-        .build();
-    let ground_colider = ColliderBuilder::cuboid(10.0, 10.0, 1.0)
-        .collision_groups(FIELD_INTERACTION_GROUPS)
-        .restitution(0.0)
-        .build();
-    let ground = physics_world.rigid_body_set.insert(ground);
-    physics_world.collider_set.insert_with_parent(
-        ground_colider,
-        ground,
-        &mut physics_world.rigid_body_set,
-    );
     let mut tracking = 0;
     let mut loop_overuns = 0;
     let mut last_draw = Instant::now();
