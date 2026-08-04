@@ -56,7 +56,7 @@ fn main() {
     let mut tracking = 0;
     let mut loop_overuns = 0;
     let mut last_draw = Instant::now();
-    for _ in 0..1000 {
+    loop {
         let start_time = Instant::now();
         for _ in 0..SUB_STEPS {
             robots.iter().for_each(|r| {
@@ -77,8 +77,8 @@ fn main() {
         }
         let processing_time = start_time.elapsed();
         if tracking % 50 == 0 {
-            // println!("processing time: {:?}", processing_time);
-            // println!("loop overuns: {}", loop_overuns);
+            println!("processing time: {:?}", processing_time);
+            println!("loop overuns: {}", loop_overuns);
         }
         tracking += 1;
         if processing_time
