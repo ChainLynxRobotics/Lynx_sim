@@ -21,3 +21,5 @@ pub const BUMPER_INTERACTION_GROUPS: InteractionGroups = InteractionGroups {
 
 pub const FIELD_INTERACTION_GROUPS: InteractionGroups =
     InteractionGroups::new(Group::GROUP_1, Group::all(), Or);
+
+pub const SLEEP_THRESHOLD: f32 = 0.1;

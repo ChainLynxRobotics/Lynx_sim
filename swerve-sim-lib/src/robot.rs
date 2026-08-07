@@ -1,5 +1,5 @@
 use crate::{
-    BUMPER_INTERACTION_GROUPS, physics_world,
+    BUMPER_INTERACTION_GROUPS, SLEEP_THRESHOLD, physics_world,
     swerve_module::{SwerveModule, config::SwerveModuleConfig},
 };
 use rapier3d::{
@@ -42,7 +42,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
         {
             let drive_base_real = physics_world.rigid_body_set.get_mut(drive_base).unwrap();
             let activation = drive_base_real.activation_mut();
-            activation.normalized_linear_threshold = 0.4;
+            activation.normalized_linear_threshold = SLEEP_THRESHOLD;
         }
         let drive_base_collider = if cornner_radius > quantity!(0.0, m, f32) {
             // TODO: Check if the slight performance hit of the round cuboid collider acctualy makes any difference

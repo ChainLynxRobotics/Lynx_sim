@@ -3,6 +3,7 @@ use rapier3d::geometry::ColliderBuilder;
 use rapier3d::math::{Pose, Vector};
 use whippyunits::{quantity, rescale, unit, value};
 
+use crate::SLEEP_THRESHOLD;
 use crate::field::Field;
 use crate::physics_world::PhysicsWorld;
 
@@ -46,7 +47,7 @@ impl Field for RebuiltField {
                 fuel.push(rb);
                 let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
                 let activation = rb_real.activation_mut();
-                activation.normalized_linear_threshold = 0.4;
+                activation.normalized_linear_threshold = SLEEP_THRESHOLD;
                 physics_world.collider_set.insert_with_parent(
                     ColliderBuilder::ball(0.075),
                     rb,

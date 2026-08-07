@@ -11,9 +11,9 @@ use rapier3d::{
 };
 use whippyunits::{quantity, unit, value};
 
-use crate::SWERVE_INTERACTION_GROUPS;
 use crate::physics_world::PhysicsWorld;
 use crate::util::motor::Motor;
+use crate::{SLEEP_THRESHOLD, SWERVE_INTERACTION_GROUPS};
 
 use self::config::SwerveModuleConfig;
 
@@ -64,7 +64,7 @@ impl SwerveModule {
         {
             let azumith_real = rigid_body_set.get_mut(azumith).unwrap();
             let activation = azumith_real.activation_mut();
-            activation.normalized_linear_threshold = 0.4;
+            activation.normalized_linear_threshold = SLEEP_THRESHOLD;
         }
         collider_set.insert_with_parent(azumith_colider, azumith, rigid_body_set);
 
@@ -95,7 +95,7 @@ impl SwerveModule {
         {
             let wheel_real = rigid_body_set.get_mut(wheel).unwrap();
             let activation = wheel_real.activation_mut();
-            activation.normalized_linear_threshold = 0.4;
+            activation.normalized_linear_threshold = SLEEP_THRESHOLD;
         }
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
 
