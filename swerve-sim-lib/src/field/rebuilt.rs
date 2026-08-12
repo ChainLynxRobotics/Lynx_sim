@@ -32,6 +32,7 @@ impl Field for RebuiltField {
         );
         // TODO: account for preloaded fuel
         // see 6.3.4 SCORING ELEMENTS https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
+        // TODO: fix fuel sliding along ground rather than rolling
         let mut fuel: Vec<RigidBodyHandle> = Vec::with_capacity(408);
         for i in 0..=21 {
             for j in 0..=21 {
