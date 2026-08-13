@@ -203,6 +203,106 @@ impl Field for RebuiltField {
             );
         });
 
+        let depot_position = Pose::new(
+            Vector::new(
+                value!(rescale!(quantity!(325.61, inch, f32), m, f32), m, f32),
+                value!(
+                    rescale!(quantity!(-((317.69 / 2.0) - 82.84), inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                0.0,
+            ),
+            Vector::ZERO,
+        );
+
+        [
+            depot_position,
+            Pose::new(Vector::ZERO, Vector::Z * PI) * depot_position,
+        ]
+        .iter()
+        .for_each(|p| {
+            const HEIGHT: f32 = value!(rescale!(quantity!(1.125, inch, f32), m, f32), m, f32);
+            let collider = ColliderBuilder::cuboid(
+                value!(
+                    rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
+                HEIGHT / 2.0,
+            )
+            .position(p.prepend_translation(Vector::new(
+                -value!(
+                    rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                value!(
+                    rescale!(quantity!((42.0 - 3.0) / 2.0, inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                HEIGHT / 2.0,
+            )));
+
+            physics_world.collider_set.insert_with_parent(
+                collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+
+            let collider = ColliderBuilder::cuboid(
+                value!(
+                    rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
+                HEIGHT / 2.0,
+            )
+            .position(p.prepend_translation(Vector::new(
+                -value!(
+                    rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                value!(
+                    rescale!(quantity!(-((42.0 - 3.0) / 2.0), inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                HEIGHT / 2.0,
+            )));
+
+            physics_world.collider_set.insert_with_parent(
+                collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+
+            let collider = ColliderBuilder::cuboid(
+                value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(42.0 / 2.0, inch, f32), m, f32), m, f32),
+                HEIGHT / 2.0,
+            )
+            .position(p.prepend_translation(Vector::new(
+                -value!(
+                    rescale!(quantity!(27.0 - (3.0 / 2.0), inch, f32), m, f32),
+                    m,
+                    f32
+                ),
+                0.0,
+                HEIGHT / 2.0,
+            )));
+
+            physics_world.collider_set.insert_with_parent(
+                collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+        });
+
         Box::new(RebuiltField { fuel })
     }
 
