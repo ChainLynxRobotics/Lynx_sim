@@ -158,7 +158,7 @@ impl Field for RebuiltField {
         let hub: Vec<SharedShape> = load_from_path(
             path,
             &rapier3d::geometry::MeshConverter::TriMesh,
-            Vector::ONE * 0.001,
+            Vector::ONE,
         )
         .expect("Failed to load mesh")
         .iter()
