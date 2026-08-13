@@ -13,6 +13,9 @@ pub struct RebuiltField {
 
 const WIDTH: unit!(m, f32) = rescale!(quantity!(651.22, inch, f32), m, f32);
 const HEIGHT: unit!(m, f32) = rescale!(quantity!(317.69, inch, f32), m, f32);
+const TOTAL_FUEL: usize = 504;
+const FUEL_OFFSET: unit!(m, f32) = rescale!(quantity!(72.0 / 12.0, inch, f32), m, f32);
+const FUEL_RADIUS: unit!(m, f32) = quantity!(0.075, m, f32);
 
 impl Field for RebuiltField {
     fn new(physics_world: &mut PhysicsWorld) -> Box<Self> {
@@ -33,16 +36,44 @@ impl Field for RebuiltField {
         // TODO: account for preloaded fuel
         // see 6.3.4 SCORING ELEMENTS https://firstfrc.blob.core.windows.net/frc2026/Manual/2026GameManual.pdf
         // TODO: fix fuel sliding along ground rather than rolling
-        let mut fuel: Vec<RigidBodyHandle> = Vec::with_capacity(408);
-        for i in 0..=21 {
-            for j in 0..=21 {
+
+        let fuel_in_neutral_zone = TOTAL_FUEL - (24 * 4); // 24 fuel in the depot and in the outpost for each alliance
+        let mut fuel: Vec<RigidBodyHandle> = Vec::with_capacity(TOTAL_FUEL);
+        let mut translations: Vec<Vector> = Vec::with_capacity(fuel_in_neutral_zone / 4);
+        let mut i = 0;
+        'outer: loop {
+            for j in 0..=5 {
+                translations.push(Vector::new(
+                    value!(((j as f32) * FUEL_OFFSET) + FUEL_OFFSET / 2.0, m, f32),
+                    value!(
+                        ((i as f32) * FUEL_OFFSET)
+                            + rescale!(quantity!(1.0, inch, f32), m, f32)
+                            + FUEL_RADIUS,
+                        m,
+                        f32
+                    ),
+                    value!(FUEL_RADIUS, m, f32),
+                ));
+                if (i * 6) + j >= fuel_in_neutral_zone / 4 {
+                    break 'outer;
+                }
+            }
+            i += 1;
+        }
+        translations
+            .iter()
+            .flat_map(|t| {
+                [
+                    t.clone(),
+                    Vector::new(t.x, -t.y, t.z),
+                    Vector::new(-t.x, t.y, t.z),
+                    Vector::new(-t.x, -t.y, t.z),
+                ]
+            })
+            .for_each(|t| {
                 let rb = physics_world.rigid_body_set.insert(
                     RigidBodyBuilder::dynamic()
-                        .pose(Pose::from_translation(Vector::new(
-                            (((i as f32) - 10.5) / 10.5) * 4.0,
-                            (((j as f32) - 10.5) / 10.5) * 4.0,
-                            0.1,
-                        )))
+                        .pose(Pose::from_translation(t))
                         .gyroscopic_forces_enabled(false),
                 );
                 fuel.push(rb);
@@ -54,8 +85,8 @@ impl Field for RebuiltField {
                     rb,
                     &mut physics_world.rigid_body_set,
                 );
-            }
-        }
+            });
+
         Box::new(RebuiltField { fuel })
     }
 
