@@ -86,6 +86,64 @@ impl Field for RebuiltField {
                     &mut physics_world.rigid_body_set,
                 );
             });
+        let bump_center = Vector::new(
+            value!(rescale!(quantity!(120.0 + 23.5, inch, f32), m, f32), m, f32),
+            value!(
+                rescale!(quantity!((73.0 + 47.0) / 2.0, inch, f32), m, f32),
+                m,
+                f32
+            ),
+            0.0,
+        );
+        let bump = [
+            Vector::new(
+                value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                0.0,
+            ),
+            Vector::new(
+                -value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                0.0,
+            ),
+            Vector::new(
+                value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
+                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                0.0,
+            ),
+            Vector::new(
+                -value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
+                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                0.0,
+            ),
+            Vector::new(
+                0.0,
+                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(6.531, inch, f32), m, f32), m, f32),
+            ),
+            Vector::new(
+                0.0,
+                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(6.531, inch, f32), m, f32), m, f32),
+            ),
+        ]
+        .map(|t| t + bump_center);
+        [
+            bump.clone(),
+            bump.map(|b| Vector::new(-b.x, b.y, b.z)),
+            bump.map(|b| Vector::new(b.x, -b.y, b.z)),
+            bump.map(|b| Vector::new(-b.x, -b.y, b.z)),
+        ]
+        .iter()
+        .for_each(|bump| {
+            let collider = ColliderBuilder::convex_hull(bump)
+                .expect("Failed to convert the bump into a convex hull");
+            physics_world.collider_set.insert_with_parent(
+                collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+        });
 
         Box::new(RebuiltField { fuel })
     }
