@@ -10,6 +10,7 @@ rapier3d = { version = "0.35.1", features = ["debug-render"] }
 serde = "1.0.228"
 whippyunits = "0.2.6"
 ipc-types = { path = "../ipc-types" }
+rapier3d-meshloader = { version = "0.35.1", default-features = false, features = [ "stl" ] }
 [features]
 default = ["debug_renderer"]
 debug_renderer = []

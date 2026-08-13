@@ -1,6 +1,9 @@
+use std::f32::consts::PI;
+
 use rapier3d::dynamics::{RigidBodyBuilder, RigidBodyHandle};
-use rapier3d::geometry::ColliderBuilder;
-use rapier3d::math::{Pose, Vector};
+use rapier3d::geometry::{ColliderBuilder, SharedShape};
+use rapier3d::math::{Pose, Vec3, Vector};
+use rapier3d_meshloader::load_from_path;
 use whippyunits::{quantity, rescale, unit, value};
 
 use crate::SLEEP_THRESHOLD;
@@ -140,6 +143,61 @@ impl Field for RebuiltField {
                 .expect("Failed to convert the bump into a convex hull");
             physics_world.collider_set.insert_with_parent(
                 collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+        });
+        let mut path = std::env::current_exe().expect("coulent get execution path");
+        path.pop();
+        path.pop();
+        path.pop();
+        path.push("swerve-sim-lib");
+        path.push("assets");
+        path.push("Hub.stl");
+
+        let hub: Vec<SharedShape> = load_from_path(
+            path,
+            &rapier3d::geometry::MeshConverter::TriMesh,
+            Vector::ONE * 0.001,
+        )
+        .expect("Failed to load mesh")
+        .iter()
+        .map(|s| s.as_ref().expect("Failed to load shape"))
+        .map(|s| s.shape.clone())
+        .collect();
+        assert!(hub.len() == 1, "multiple meshes in the hub file");
+        let hub = hub[0].clone();
+        let hub = ColliderBuilder::new(hub);
+        let hub_positions = [
+            Pose::new(
+                Vec3::new(
+                    value!(
+                        rescale!(quantity!(120.0 + 47.0 / 2.0, inch, f32), m, f32),
+                        m,
+                        f32
+                    ),
+                    0.0,
+                    0.0,
+                ),
+                Vec3::new(0.0, 0.0, PI / 2.0),
+            ),
+            Pose::new(
+                Vec3::new(
+                    -value!(
+                        rescale!(quantity!(120.0 + 47.0 / 2.0, inch, f32), m, f32),
+                        m,
+                        f32
+                    ),
+                    0.0,
+                    0.0,
+                ),
+                Vec3::new(0.0, 0.0, PI * 1.5),
+            ),
+        ];
+        hub_positions.iter().for_each(|p| {
+            let hub = hub.clone().position(*p);
+            physics_world.collider_set.insert_with_parent(
+                hub,
                 field,
                 &mut physics_world.rigid_body_set,
             );
