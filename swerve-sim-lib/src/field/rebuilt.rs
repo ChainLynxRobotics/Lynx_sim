@@ -147,6 +147,45 @@ impl Field for RebuiltField {
                 &mut physics_world.rigid_body_set,
             );
         });
+
+        let trench_position = Vector::new(
+            value!(
+                rescale!(quantity!(325.61 - 182.11, inch, f32), m, f32),
+                m,
+                f32
+            ),
+            value!(
+                rescale!(
+                    quantity!((47.0 / 2.0) + 73.0 + (12.0 / 2.0), inch, f32),
+                    m,
+                    f32
+                ),
+                m,
+                f32
+            ),
+            value!(rescale!(quantity!(29.25 / 2.0, inch, f32), m, f32), m, f32),
+        );
+        [
+            trench_position,
+            Vector::new(-trench_position.x, trench_position.y, trench_position.z),
+            Vector::new(trench_position.x, -trench_position.y, trench_position.z),
+            Vector::new(-trench_position.x, -trench_position.y, trench_position.z),
+        ]
+        .iter()
+        .for_each(|p| {
+            let collider = ColliderBuilder::cuboid(
+                value!(rescale!(quantity!(47.0 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(12.0 / 2.0, inch, f32), m, f32), m, f32),
+                value!(rescale!(quantity!(29.25 / 2.0, inch, f32), m, f32), m, f32),
+            )
+            .translation(*p);
+            physics_world.collider_set.insert_with_parent(
+                collider,
+                field,
+                &mut physics_world.rigid_body_set,
+            );
+        });
+
         let mut path = std::env::current_exe().expect("coulent get execution path");
         path.pop();
         path.pop();
