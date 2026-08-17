@@ -202,7 +202,7 @@ impl Field for RebuiltField {
         .iter()
         .for_each(|p| {
             const HEIGHT: f32 = inch_to_m!(1.125);
-            let sizes_and_positions = [
+            [
                 (
                     Vector::new(
                         inch_to_m!((27.0 - 3.0) / 2.0),
