@@ -74,20 +74,7 @@ impl Field for RebuiltField {
                 ]
             })
             .for_each(|t| {
-                let rb = physics_world.rigid_body_set.insert(
-                    RigidBodyBuilder::dynamic()
-                        .pose(Pose::from_translation(t))
-                        .gyroscopic_forces_enabled(false),
-                );
-                fuel.push(rb);
-                let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
-                let activation = rb_real.activation_mut();
-                activation.normalized_linear_threshold = SLEEP_THRESHOLD;
-                physics_world.collider_set.insert_with_parent(
-                    ColliderBuilder::ball(0.075),
-                    rb,
-                    &mut physics_world.rigid_body_set,
-                );
+                spawn_fuel(physics_world, t, &mut fuel);
             });
         let bump_center = Vector::new(
             inch_to_m!(120.0 + 23.5),
@@ -215,27 +202,8 @@ impl Field for RebuiltField {
                         value!(FUEL_RADIUS, m, f32),
                     ));
 
-                    let top_fuel = RigidBodyBuilder::dynamic().pose(top_fuel);
-                    let top_fuel = physics_world.rigid_body_set.insert(top_fuel);
-
-                    let bottom_fuel = RigidBodyBuilder::dynamic().pose(bottom_fuel);
-                    let bottom_fuel = physics_world.rigid_body_set.insert(bottom_fuel);
-
-                    let top_fuel_collider = ColliderBuilder::ball(value!(FUEL_RADIUS, m, f32));
-                    let bottom_fuel_collider = ColliderBuilder::ball(value!(FUEL_RADIUS, m, f32));
-
-                    physics_world.collider_set.insert_with_parent(
-                        top_fuel_collider,
-                        top_fuel,
-                        &mut physics_world.rigid_body_set,
-                    );
-                    physics_world.collider_set.insert_with_parent(
-                        bottom_fuel_collider,
-                        bottom_fuel,
-                        &mut physics_world.rigid_body_set,
-                    );
-                    fuel.push(top_fuel);
-                    fuel.push(bottom_fuel);
+                    spawn_fuel(physics_world, top_fuel.translation, &mut fuel);
+                    spawn_fuel(physics_world, bottom_fuel.translation, &mut fuel);
                 }
             }
             const HEIGHT: f32 = inch_to_m!(1.125);
@@ -378,4 +346,21 @@ impl Field for RebuiltField {
     fn get_red_score(&self, physics_world: &PhysicsWorld) -> u64 {
         todo!()
     }
+}
+
+fn spawn_fuel(physics_world: &mut PhysicsWorld, position: Vector, fuel: &mut Vec<RigidBodyHandle>) {
+    let rb = physics_world.rigid_body_set.insert(
+        RigidBodyBuilder::dynamic()
+            .translation(position)
+            .gyroscopic_forces_enabled(false),
+    );
+    fuel.push(rb);
+    let rb_real = physics_world.rigid_body_set.get_mut(rb).unwrap();
+    let activation = rb_real.activation_mut();
+    activation.normalized_linear_threshold = SLEEP_THRESHOLD;
+    physics_world.collider_set.insert_with_parent(
+        ColliderBuilder::ball(0.075),
+        rb,
+        &mut physics_world.rigid_body_set,
+    );
 }
