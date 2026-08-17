@@ -314,6 +314,56 @@ impl Field for RebuiltField {
             physics_world.collider_set.insert(collider);
         });
 
+        let top_wall = ColliderBuilder::cuboid(inch_to_m!(325.61), 0.5, inch_to_m!(19.2675 / 2.0))
+            .translation(Vector::new(
+                0.0,
+                inch_to_m!(158.84) + 0.5,
+                inch_to_m!(19.2675 / 2.0),
+            ));
+        let bottom_wall =
+            ColliderBuilder::cuboid(inch_to_m!(325.61), 0.5, inch_to_m!(19.2675 / 2.0))
+                .translation(Vector::new(
+                    0.0,
+                    -(inch_to_m!(158.84) + 0.5),
+                    inch_to_m!(19.2675 / 2.0),
+                ));
+
+        physics_world.collider_set.insert_with_parent(
+            top_wall,
+            field,
+            &mut physics_world.rigid_body_set,
+        );
+        physics_world.collider_set.insert_with_parent(
+            bottom_wall,
+            field,
+            &mut physics_world.rigid_body_set,
+        );
+
+        let right_wall =
+            ColliderBuilder::cuboid(0.5, inch_to_m!(158.84), inch_to_m!(19.2675 / 2.0))
+                .translation(Vector::new(
+                    inch_to_m!(325.61) + 0.5,
+                    0.0,
+                    inch_to_m!(19.2675 / 2.0),
+                ));
+        let left_wall = ColliderBuilder::cuboid(0.5, inch_to_m!(158.84), inch_to_m!(19.2675 / 2.0))
+            .translation(Vector::new(
+                -(inch_to_m!(325.61) + 0.5),
+                0.0,
+                inch_to_m!(19.2675 / 2.0),
+            ));
+
+        physics_world.collider_set.insert_with_parent(
+            right_wall,
+            field,
+            &mut physics_world.rigid_body_set,
+        );
+        physics_world.collider_set.insert_with_parent(
+            left_wall,
+            field,
+            &mut physics_world.rigid_body_set,
+        );
+
         Box::new(RebuiltField { fuel })
     }
 
