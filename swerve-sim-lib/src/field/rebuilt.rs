@@ -201,6 +201,43 @@ impl Field for RebuiltField {
         ]
         .iter()
         .for_each(|p| {
+            for i in 0..=3 {
+                for j in 0..=2 {
+                    // from the perspective of the field dimension drawing
+                    let top_fuel = p.prepend_translation(Vector::new(
+                        -value!((FUEL_OFFSET * (1 + i) as f32) - FUEL_RADIUS, m, f32),
+                        value!((FUEL_OFFSET * (1 + j) as f32) - FUEL_RADIUS, m, f32),
+                        value!(FUEL_RADIUS, m, f32),
+                    ));
+                    let bottom_fuel = p.prepend_translation(Vector::new(
+                        -value!((FUEL_OFFSET * (1 + i) as f32) - FUEL_RADIUS, m, f32),
+                        -value!((FUEL_OFFSET * (1 + j) as f32) - FUEL_RADIUS, m, f32),
+                        value!(FUEL_RADIUS, m, f32),
+                    ));
+
+                    let top_fuel = RigidBodyBuilder::dynamic().pose(top_fuel);
+                    let top_fuel = physics_world.rigid_body_set.insert(top_fuel);
+
+                    let bottom_fuel = RigidBodyBuilder::dynamic().pose(bottom_fuel);
+                    let bottom_fuel = physics_world.rigid_body_set.insert(bottom_fuel);
+
+                    let top_fuel_collider = ColliderBuilder::ball(value!(FUEL_RADIUS, m, f32));
+                    let bottom_fuel_collider = ColliderBuilder::ball(value!(FUEL_RADIUS, m, f32));
+
+                    physics_world.collider_set.insert_with_parent(
+                        top_fuel_collider,
+                        top_fuel,
+                        &mut physics_world.rigid_body_set,
+                    );
+                    physics_world.collider_set.insert_with_parent(
+                        bottom_fuel_collider,
+                        bottom_fuel,
+                        &mut physics_world.rigid_body_set,
+                    );
+                    fuel.push(top_fuel);
+                    fuel.push(bottom_fuel);
+                }
+            }
             const HEIGHT: f32 = inch_to_m!(1.125);
             [
                 (
