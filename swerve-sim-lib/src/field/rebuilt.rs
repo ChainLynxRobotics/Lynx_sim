@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use rapier3d::dynamics::{RigidBodyBuilder, RigidBodyHandle};
 use rapier3d::geometry::{ColliderBuilder, SharedShape};
-use rapier3d::math::{Pose, Vec3, Vector};
+use rapier3d::math::{Pose, Vector};
 use rapier3d_meshloader::load_from_path;
 use whippyunits::{quantity, rescale, unit, value};
 
@@ -169,12 +169,12 @@ impl Field for RebuiltField {
         let hub = ColliderBuilder::new(hub);
         let hub_positions = [
             Pose::new(
-                Vec3::new(inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
-                Vec3::new(0.0, 0.0, PI / 2.0),
+                Vector::new(inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
+                Vector::new(0.0, 0.0, PI / 2.0),
             ),
             Pose::new(
-                Vec3::new(-inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
-                Vec3::new(0.0, 0.0, PI * 1.5),
+                Vector::new(-inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
+                Vector::new(0.0, 0.0, PI * 1.5),
             ),
         ];
         hub_positions.iter().for_each(|p| {
