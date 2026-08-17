@@ -249,6 +249,34 @@ impl Field for RebuiltField {
             });
         });
 
+        let tower_positions = [
+            Vector::new(
+                inch_to_m!(325.61 - (40.0725 + 3.5 / 2.0)),
+                inch_to_m!((32.25 / 2.0) - (26.22 + 121.25) + (87.38 + 82.84)),
+                inch_to_m!(72.125 / 2.0),
+            ),
+            Vector::new(
+                inch_to_m!(325.61 - (40.0725 + 3.5 / 2.0)),
+                inch_to_m!((-32.25 / 2.0) - (26.22 + 121.25) + (87.38 + 82.84)),
+                inch_to_m!(72.125 / 2.0),
+            ),
+        ];
+        [
+            tower_positions,
+            tower_positions.map(|p| Pose::new(Vector::ZERO, Vector::Z * PI) * p),
+        ]
+        .iter()
+        .flat_map(|p| p)
+        .for_each(|p| {
+            let collider = ColliderBuilder::cuboid(
+                inch_to_m!(3.5 / 2.0),
+                inch_to_m!(1.5 / 2.0),
+                inch_to_m!(72.125 / 2.0),
+            )
+            .translation(*p);
+            physics_world.collider_set.insert(collider);
+        });
+
         Box::new(RebuiltField { fuel })
     }
 
