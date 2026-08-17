@@ -6,9 +6,9 @@ use rapier3d::math::{Pose, Vec3, Vector};
 use rapier3d_meshloader::load_from_path;
 use whippyunits::{quantity, rescale, unit, value};
 
-use crate::SLEEP_THRESHOLD;
 use crate::field::Field;
 use crate::physics_world::PhysicsWorld;
+use crate::{SLEEP_THRESHOLD, inch_to_m};
 
 pub struct RebuiltField {
     fuel: Vec<RigidBodyHandle>,
@@ -90,45 +90,17 @@ impl Field for RebuiltField {
                 );
             });
         let bump_center = Vector::new(
-            value!(rescale!(quantity!(120.0 + 23.5, inch, f32), m, f32), m, f32),
-            value!(
-                rescale!(quantity!((73.0 + 47.0) / 2.0, inch, f32), m, f32),
-                m,
-                f32
-            ),
+            inch_to_m!(120.0 + 23.5),
+            inch_to_m!((73.0 + 47.0) / 2.0),
             0.0,
         );
         let bump = [
-            Vector::new(
-                value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                0.0,
-            ),
-            Vector::new(
-                -value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                0.0,
-            ),
-            Vector::new(
-                value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
-                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                0.0,
-            ),
-            Vector::new(
-                -value!(rescale!(quantity!(44.4 / 2.0, inch, f32), m, f32), m, f32),
-                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                0.0,
-            ),
-            Vector::new(
-                0.0,
-                value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(6.531, inch, f32), m, f32), m, f32),
-            ),
-            Vector::new(
-                0.0,
-                -value!(rescale!(quantity!(73.0 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(6.531, inch, f32), m, f32), m, f32),
-            ),
+            Vector::new(inch_to_m!(44.4 / 2.0), inch_to_m!(73.0 / 2.0), 0.0),
+            Vector::new(-inch_to_m!(44.4 / 2.0), inch_to_m!(73.0 / 2.0), 0.0),
+            Vector::new(inch_to_m!(44.4 / 2.0), -inch_to_m!(73.0 / 2.0), 0.0),
+            Vector::new(-inch_to_m!(44.4 / 2.0), -inch_to_m!(73.0 / 2.0), 0.0),
+            Vector::new(0.0, inch_to_m!(73.0 / 2.0), inch_to_m!(6.531)),
+            Vector::new(0.0, -inch_to_m!(73.0 / 2.0), inch_to_m!(6.531)),
         ]
         .map(|t| t + bump_center);
         [
@@ -149,21 +121,9 @@ impl Field for RebuiltField {
         });
 
         let trench_position = Vector::new(
-            value!(
-                rescale!(quantity!(325.61 - 182.11, inch, f32), m, f32),
-                m,
-                f32
-            ),
-            value!(
-                rescale!(
-                    quantity!((47.0 / 2.0) + 73.0 + (12.0 / 2.0), inch, f32),
-                    m,
-                    f32
-                ),
-                m,
-                f32
-            ),
-            value!(rescale!(quantity!(29.25 / 2.0, inch, f32), m, f32), m, f32),
+            inch_to_m!(325.61 - 182.11),
+            inch_to_m!((47.0 / 2.0) + 73.0 + (12.0 / 2.0)),
+            inch_to_m!(29.25 / 2.0),
         );
         [
             trench_position,
@@ -174,9 +134,9 @@ impl Field for RebuiltField {
         .iter()
         .for_each(|p| {
             let collider = ColliderBuilder::cuboid(
-                value!(rescale!(quantity!(47.0 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(12.0 / 2.0, inch, f32), m, f32), m, f32),
-                value!(rescale!(quantity!(29.25 / 2.0, inch, f32), m, f32), m, f32),
+                inch_to_m!(47.0 / 2.0),
+                inch_to_m!(12.0 / 2.0),
+                inch_to_m!(29.25 / 2.0),
             )
             .translation(*p);
             physics_world.collider_set.insert_with_parent(
@@ -209,27 +169,11 @@ impl Field for RebuiltField {
         let hub = ColliderBuilder::new(hub);
         let hub_positions = [
             Pose::new(
-                Vec3::new(
-                    value!(
-                        rescale!(quantity!(120.0 + 47.0 / 2.0, inch, f32), m, f32),
-                        m,
-                        f32
-                    ),
-                    0.0,
-                    0.0,
-                ),
+                Vec3::new(inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
                 Vec3::new(0.0, 0.0, PI / 2.0),
             ),
             Pose::new(
-                Vec3::new(
-                    -value!(
-                        rescale!(quantity!(120.0 + 47.0 / 2.0, inch, f32), m, f32),
-                        m,
-                        f32
-                    ),
-                    0.0,
-                    0.0,
-                ),
+                Vec3::new(-inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
                 Vec3::new(0.0, 0.0, PI * 1.5),
             ),
         ];
@@ -244,12 +188,8 @@ impl Field for RebuiltField {
 
         let depot_position = Pose::new(
             Vector::new(
-                value!(rescale!(quantity!(325.61, inch, f32), m, f32), m, f32),
-                value!(
-                    rescale!(quantity!(-((317.69 / 2.0) - 82.84), inch, f32), m, f32),
-                    m,
-                    f32
-                ),
+                inch_to_m!(325.61),
+                inch_to_m!(-((317.69 / 2.0) - 82.84)),
                 0.0,
             ),
             Vector::ZERO,
@@ -261,71 +201,35 @@ impl Field for RebuiltField {
         ]
         .iter()
         .for_each(|p| {
-            const HEIGHT: f32 = value!(rescale!(quantity!(1.125, inch, f32), m, f32), m, f32);
+            const HEIGHT: f32 = inch_to_m!(1.125);
             let sizes_and_positions = [
                 (
                     Vector::new(
-                        value!(
-                            rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
-                        value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
+                        inch_to_m!((27.0 - 3.0) / 2.0),
+                        inch_to_m!(3.0 / 2.0),
                         HEIGHT / 2.0,
                     ),
                     Vector::new(
-                        -value!(
-                            rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
-                        value!(
-                            rescale!(quantity!((42.0 - 3.0) / 2.0, inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
+                        -inch_to_m!((27.0 - 3.0) / 2.0),
+                        inch_to_m!((42.0 - 3.0) / 2.0),
                         HEIGHT / 2.0,
                     ),
                 ),
                 (
                     Vector::new(
-                        value!(
-                            rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
-                        value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
+                        inch_to_m!((27.0 - 3.0) / 2.0),
+                        inch_to_m!(3.0 / 2.0),
                         HEIGHT / 2.0,
                     ),
                     Vector::new(
-                        -value!(
-                            rescale!(quantity!((27.0 - 3.0) / 2.0, inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
-                        value!(
-                            rescale!(quantity!(-((42.0 - 3.0) / 2.0), inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
+                        -inch_to_m!((27.0 - 3.0) / 2.0),
+                        inch_to_m!(-((42.0 - 3.0) / 2.0)),
                         HEIGHT / 2.0,
                     ),
                 ),
                 (
-                    Vector::new(
-                        value!(rescale!(quantity!(3.0 / 2.0, inch, f32), m, f32), m, f32),
-                        value!(rescale!(quantity!(42.0 / 2.0, inch, f32), m, f32), m, f32),
-                        HEIGHT / 2.0,
-                    ),
-                    Vector::new(
-                        -value!(
-                            rescale!(quantity!(27.0 - (3.0 / 2.0), inch, f32), m, f32),
-                            m,
-                            f32
-                        ),
-                        0.0,
-                        HEIGHT / 2.0,
-                    ),
+                    Vector::new(inch_to_m!(3.0 / 2.0), inch_to_m!(42.0 / 2.0), HEIGHT / 2.0),
+                    Vector::new(-inch_to_m!(27.0 - (3.0 / 2.0)), 0.0, HEIGHT / 2.0),
                 ),
             ]
             .iter()
