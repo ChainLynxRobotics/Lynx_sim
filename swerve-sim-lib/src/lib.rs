@@ -1,4 +1,4 @@
-#![feature(random)]
+#![feature(random, unboxed_closures)]
 use rapier3d::geometry::{Group, InteractionGroups, InteractionTestMode::Or};
 
 pub mod field;

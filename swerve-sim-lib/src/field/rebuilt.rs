@@ -63,19 +63,11 @@ impl Field for RebuiltField {
             }
             i += 1;
         }
-        translations
-            .iter()
-            .flat_map(|t| {
-                [
-                    t.clone(),
-                    Vector::new(t.x, -t.y, t.z),
-                    Vector::new(-t.x, t.y, t.z),
-                    Vector::new(-t.x, -t.y, t.z),
-                ]
-            })
-            .for_each(|t| {
-                spawn_fuel(physics_world, t, &mut fuel);
+        translations.iter().for_each(|t| {
+            mirror_to_the_four_sectors(*t, |translation| {
+                spawn_fuel(physics_world, *translation, &mut fuel)
             });
+        });
         let bump_center = Vector::new(
             inch_to_m!(120.0 + 23.5),
             inch_to_m!((73.0 + 47.0) / 2.0),
@@ -88,17 +80,10 @@ impl Field for RebuiltField {
             Vector::new(-inch_to_m!(44.4 / 2.0), -inch_to_m!(73.0 / 2.0), 0.0),
             Vector::new(0.0, inch_to_m!(73.0 / 2.0), inch_to_m!(6.531)),
             Vector::new(0.0, -inch_to_m!(73.0 / 2.0), inch_to_m!(6.531)),
-        ]
-        .map(|t| t + bump_center);
-        [
-            bump.clone(),
-            bump.map(|b| Vector::new(-b.x, b.y, b.z)),
-            bump.map(|b| Vector::new(b.x, -b.y, b.z)),
-            bump.map(|b| Vector::new(-b.x, -b.y, b.z)),
-        ]
-        .iter()
-        .for_each(|bump| {
-            let collider = ColliderBuilder::convex_hull(bump)
+        ];
+        mirror_to_the_four_sectors(bump_center, |center| {
+            let points = bump.map(|t| t + center);
+            let collider = ColliderBuilder::convex_hull(&points)
                 .expect("Failed to convert the bump into a convex hull");
             physics_world.collider_set.insert_with_parent(
                 collider,
@@ -112,14 +97,7 @@ impl Field for RebuiltField {
             inch_to_m!((47.0 / 2.0) + 73.0 + (12.0 / 2.0)),
             inch_to_m!(29.25 / 2.0),
         );
-        [
-            trench_position,
-            Vector::new(-trench_position.x, trench_position.y, trench_position.z),
-            Vector::new(trench_position.x, -trench_position.y, trench_position.z),
-            Vector::new(-trench_position.x, -trench_position.y, trench_position.z),
-        ]
-        .iter()
-        .for_each(|p| {
+        mirror_to_the_four_sectors(trench_position, |p| {
             let collider = ColliderBuilder::cuboid(
                 inch_to_m!(47.0 / 2.0),
                 inch_to_m!(12.0 / 2.0),
@@ -154,24 +132,21 @@ impl Field for RebuiltField {
         assert!(hub.len() == 1, "multiple meshes in the hub file");
         let hub = hub[0].clone();
         let hub = ColliderBuilder::new(hub);
-        let hub_positions = [
+
+        mirror_for_alliances(
             Pose::new(
                 Vector::new(inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
                 Vector::new(0.0, 0.0, PI / 2.0),
             ),
-            Pose::new(
-                Vector::new(-inch_to_m!(120.0 + 47.0 / 2.0), 0.0, 0.0),
-                Vector::new(0.0, 0.0, PI * 1.5),
-            ),
-        ];
-        hub_positions.iter().for_each(|p| {
-            let hub = hub.clone().position(*p);
-            physics_world.collider_set.insert_with_parent(
-                hub,
-                field,
-                &mut physics_world.rigid_body_set,
-            );
-        });
+            |p| {
+                let hub = hub.clone().position(*p);
+                physics_world.collider_set.insert_with_parent(
+                    hub,
+                    field,
+                    &mut physics_world.rigid_body_set,
+                );
+            },
+        );
 
         let depot_position = Pose::new(
             Vector::new(
@@ -181,13 +156,7 @@ impl Field for RebuiltField {
             ),
             Vector::ZERO,
         );
-
-        [
-            depot_position,
-            Pose::new(Vector::ZERO, Vector::Z * PI) * depot_position,
-        ]
-        .iter()
-        .for_each(|p| {
+        mirror_for_alliances(depot_position, |p| {
             for i in 0..=3 {
                 for j in 0..=2 {
                     // from the perspective of the field dimension drawing
@@ -253,33 +222,27 @@ impl Field for RebuiltField {
                 );
             });
         });
-
-        let tower_positions = [
-            Vector::new(
-                inch_to_m!(325.61 - (40.0725 + 3.5 / 2.0)),
-                inch_to_m!((32.25 / 2.0) - (26.22 + 121.25) + (87.38 + 82.84)),
-                inch_to_m!(72.125 / 2.0),
-            ),
-            Vector::new(
-                inch_to_m!(325.61 - (40.0725 + 3.5 / 2.0)),
-                inch_to_m!((-32.25 / 2.0) - (26.22 + 121.25) + (87.38 + 82.84)),
-                inch_to_m!(72.125 / 2.0),
-            ),
-        ];
-        [
-            tower_positions,
-            tower_positions.map(|p| Pose::new(Vector::ZERO, Vector::Z * PI) * p),
-        ]
-        .iter()
-        .flat_map(|p| p)
-        .for_each(|p| {
-            let collider = ColliderBuilder::cuboid(
-                inch_to_m!(3.5 / 2.0),
-                inch_to_m!(1.5 / 2.0),
-                inch_to_m!(72.125 / 2.0),
-            )
-            .translation(*p);
-            physics_world.collider_set.insert(collider);
+        let tower_center = Vector::new(
+            inch_to_m!(325.61 - (40.0725 + 3.5 / 2.0)),
+            inch_to_m!(-(26.22 + 121.25) + (87.38 + 82.84)),
+            inch_to_m!(72.125 / 2.0),
+        );
+        mirror_for_alliances(Pose::from_translation(tower_center), |p| {
+            [
+                Vector::new(0.0, inch_to_m!(32.25 / 2.0), 0.0),
+                Vector::new(0.0, inch_to_m!(-32.25 / 2.0), 0.0),
+            ]
+            .map(|t| t + p.translation)
+            .iter()
+            .for_each(|p| {
+                let collider = ColliderBuilder::cuboid(
+                    inch_to_m!(3.5 / 2.0),
+                    inch_to_m!(1.5 / 2.0),
+                    inch_to_m!(72.125 / 2.0),
+                )
+                .translation(*p);
+                physics_world.collider_set.insert(collider);
+            });
         });
 
         let top_wall = ColliderBuilder::cuboid(inch_to_m!(325.61), 0.5, inch_to_m!(19.2675 / 2.0))
@@ -363,4 +326,24 @@ fn spawn_fuel(physics_world: &mut PhysicsWorld, position: Vector, fuel: &mut Vec
         rb,
         &mut physics_world.rigid_body_set,
     );
+}
+fn mirror_to_the_four_sectors<T: FnMut(&Vector)>(position: Vector, mut function: T) {
+    [
+        position,
+        Vector::new(-position.x, position.y, position.z),
+        Vector::new(position.x, -position.y, position.z),
+        Vector::new(-position.x, -position.y, position.z),
+    ]
+    .iter()
+    .for_each(|p| {
+        function(p);
+    });
+}
+
+fn mirror_for_alliances<T: FnMut(&Pose)>(position: Pose, mut function: T) {
+    [position, Pose::new(Vector::ZERO, Vector::Z * PI) * position]
+        .iter()
+        .for_each(|p| {
+            function(p);
+        });
 }
