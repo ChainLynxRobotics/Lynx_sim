@@ -1,4 +1,4 @@
-class Joe {
+class Joe implements AutoCloseable {
     private final long counterPtr;
     public Joe() {
         this.counterPtr = newCounter();
@@ -14,6 +14,11 @@ class Joe {
         );
     }
 
+    @Override
+    public void close() {
+        deallocCounter(this.counterPtr);
+    }
+
     public static void main(String[] args) {
         var joe = new Joe();
         System.out.println(counterValue(joe.counterPtr));
@@ -24,5 +29,6 @@ class Joe {
         incrementCounter(joe.counterPtr);
         incrementCounter(joe.counterPtr);
         System.out.println(counterValue(joe.counterPtr));
+        joe.close();
     }
 }
