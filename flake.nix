@@ -35,6 +35,7 @@
                 "rustc"
                 "rustfmt"
               ])
+              gradle
             ];
 
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (
