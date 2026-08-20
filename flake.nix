@@ -40,6 +40,8 @@
               gradle_9
             ];
 
+            hardeningDisable = [ "fortify" ];
+
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (
               with pkgs;
               [
