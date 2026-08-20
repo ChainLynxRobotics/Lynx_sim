@@ -1,6 +1,7 @@
 use jni::{
     EnvUnowned,
     errors::Error,
+    jni_mangle,
     objects::{JClass, JString},
     sys::{jint, jlong},
 };
@@ -15,8 +16,8 @@ impl Counter {
     }
 }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_Joe_hello<'caller>(
+#[jni_mangle("com.vendor.jni.VendorJNI")]
+pub fn hello<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     class: JClass<'caller>,
     input: JString<'caller>,
@@ -30,8 +31,8 @@ pub extern "system" fn Java_Joe_hello<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_Joe_newCounter<'caller>(
+#[jni_mangle("com.vendor.jni.VendorJNI")]
+pub fn new_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
 ) -> jlong {
@@ -42,8 +43,8 @@ pub extern "system" fn Java_Joe_newCounter<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "system" fn Java_Joe_incrementCounter<'caller>(
+#[jni_mangle("com.vendor.jni.VendorJNI")]
+pub unsafe fn increment_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     ptr: jlong,
@@ -59,8 +60,8 @@ pub unsafe extern "system" fn Java_Joe_incrementCounter<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "system" fn Java_Joe_counterValue<'caller>(
+#[jni_mangle("com.vendor.jni.VendorJNI")]
+pub unsafe fn counter_value<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     ptr: jlong,
@@ -74,8 +75,8 @@ pub unsafe extern "system" fn Java_Joe_counterValue<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[unsafe(no_mangle)]
-pub unsafe extern "system" fn Java_Joe_deallocCounter<'caller>(
+#[jni_mangle("com.vendor.jni.VendorJNI")]
+pub unsafe fn dealloc_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
     ptr: jlong,

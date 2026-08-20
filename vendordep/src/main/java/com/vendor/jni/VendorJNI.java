@@ -7,12 +7,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class VendorJNI {
   static boolean libraryLoaded = false;
+  private static final String libraryName = "swerve_sim_3d";
 
   /**
    * Helper class for determining whether or not to load the driver on static initialization.
    */
   public static class Helper {
-    private static AtomicBoolean extractOnStaticLoad = new AtomicBoolean(true);
+    private static AtomicBoolean extractOnStaticLoad = new AtomicBoolean(false);
 
     /**
      * Get whether to load the driver on static init.
@@ -33,7 +34,7 @@ public class VendorJNI {
 
   static {
     if (Helper.getExtractOnStaticLoad()) {
-      System.loadLibrary("VendorDriver");
+      System.loadLibrary(libraryName);
       libraryLoaded = true;
     }
   }
@@ -45,16 +46,12 @@ public class VendorJNI {
     if (libraryLoaded) {
       return;
     }
-    System.loadLibrary("VendorDriver");
+    System.loadLibrary(libraryName);
     libraryLoaded = true;
   }
 
-  /**
-   * Tells the driver to initialize.
-   * This is a demo of a native JNI method from the driver.
-   * 
-   * @return the int returned by the driver
-   * @see "VendorJNI.cpp"
-   */
-  public static native int initialize();
+  public static native long newCounter();
+  public static native void incrementCounter(long ptr);
+  public static native int counterValue(long ptr);
+  public static native void deallocCounter(long ptr);
 }
