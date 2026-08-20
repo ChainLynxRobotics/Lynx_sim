@@ -31,7 +31,7 @@ fn main() {
     let robots: Vec<Robot<_>> = (0..1)
         .map(|_| {
             Robot::new(
-                Pose::IDENTITY.append_translation(Vector::new(0.0, 0.0, 0.0)),
+                Pose::IDENTITY.append_translation(Vector::new(7.0, 2.0, 0.0)),
                 rescale!(quantity!(34.5, inch, f32), m, f32),
                 rescale!(quantity!(34.5, inch, f32), m, f32),
                 quantity!(0.11, m, f32),
@@ -62,8 +62,8 @@ fn main() {
             robots.iter().for_each(|r| {
                 r.modules.iter().for_each(|module| {
                     module.apply_voltages(
-                        quantity!(5.0, volt, f32),
-                        quantity!(5.0, volt, f32),
+                        quantity!(-12.0, volt, f32),
+                        quantity!(0.0, volt, f32),
                         SIMULATION_TIMESTEP,
                         &mut physics_world,
                     );
