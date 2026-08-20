@@ -35,7 +35,9 @@
                 "rustc"
                 "rustfmt"
               ])
-              gradle
+              temurin-bin-25
+              self.packages.${system}.gplusplus14
+              gradle_9
             ];
 
             LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath (
@@ -51,5 +53,9 @@
         }
       ) nixpkgs.legacyPackages;
       formatter = builtins.mapAttrs (system: pkgs: pkgs.nixfmt-tree) nixpkgs.legacyPackages;
+
+      packages = builtins.mapAttrs (system: pkgs: {
+        gplusplus14 = pkgs.callPackage ./g++-14.nix { };
+      }) nixpkgs.legacyPackages;
     };
 }
