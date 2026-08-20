@@ -1,0 +1,182 @@
+import org.wpilib.toolchain.*
+
+plugins {
+  id 'cpp'
+  id 'java'
+  id 'google-test'
+  id 'org.wpilib.WPILibRepositoriesPlugin' version '2027.0.0'
+  id 'org.wpilib.NativeUtils' version '2027.13.1'
+  id 'org.wpilib.GradleJni' version '2027.0.0'
+  id 'org.wpilib.GradleVsCode' version '2027.0.0'
+}
+
+// WPILib Version
+ext.wpilibVersion = "2027.+"
+
+repositories {
+  mavenCentral()
+}
+wpilibRepositories.use2027Repos()
+if (project.hasProperty('releaseMode')) {
+  wpilibRepositories.addAllReleaseRepositories(project)
+} else {
+  wpilibRepositories.addAllDevelopmentRepositories(project)
+}
+
+var javaVersion = 25
+
+// Apply C++ configuration
+apply from: 'config.gradle'
+
+// Apply Java configuration
+dependencies {
+    annotationProcessor "io.avaje:avaje-jsonb-generator:3.11"
+    implementation "io.avaje:avaje-jsonb:3.11"
+    implementation "org.wpilib.cscore:cscore-java:$wpilibVersion"
+    implementation "org.wpilib.cameraserver:cameraserver-java:$wpilibVersion"
+    implementation "org.wpilib.ntcore:ntcore-java:$wpilibVersion"
+    implementation "org.wpilib.wpilibj:wpilibj-java:$wpilibVersion"
+    implementation "org.wpilib.wpiutil:wpiutil-java:$wpilibVersion"
+    implementation "org.wpilib.wpimath:wpimath-java:$wpilibVersion"
+    implementation "org.wpilib.wpiunits:wpiunits-java:$wpilibVersion"
+    implementation "org.wpilib.datalog:datalog-java:$wpilibVersion"
+    implementation "org.wpilib.hal:hal-java:$wpilibVersion"
+    implementation "org.ejml:ejml-simple:0.44.0"
+    implementation 'org.wpilib.thirdparty.opencv:opencv-java:2027-4.13.0-3'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly 'us.hebi.quickbuf:quickbuf-runtime:1.4'
+}
+
+// Set up java tests
+test {
+    useJUnitPlatform()
+    systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+    testLogging {
+        events "failed"
+        exceptionFormat = "full"
+    }
+}
+
+if (project.hasProperty('onlylinuxarm64') || project.hasProperty('onlywindowsarm64') || project.hasProperty('onlylinuxsystemcore')) {
+    test.enabled = false
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs.add '-XDstringConcat=inline'
+    options.encoding = 'UTF-8'
+    options.release = javaVersion
+}
+
+// Setup Javadocs to link back to WPILib docs
+javadoc {
+    options {
+        links "https://docs.oracle.com/en/java/javase/$javaVersion/docs/api/", 'https://github.wpilib.org/allwpilib/docs/release/java/'
+    }
+}
+
+// Set up exports properly
+nativeUtils {
+  exportsConfigs {
+    // Main library is just default empty. This will export everything
+    Vendor {
+    }
+  }
+  privateExportsConfigs {
+    // Only export explicit symbols from driver library
+    VendorDriver {
+      exportsFile = project.file("src/main/driver/symbols.txt")
+    }
+  }
+}
+
+ext.getCurrentArch = {
+    return NativePlatforms.desktop
+}
+
+def systemArch = getCurrentArch()
+
+model {
+  components {
+    Vendor(NativeLibrarySpec) {
+      sources {
+        cpp {
+          source {
+            srcDirs 'src/main/native/cpp'
+            include '**/*.cpp'
+          }
+          exportedHeaders {
+            srcDirs 'src/main/native/include'
+          }
+        }
+      }
+      binaries.all {
+        lib library: 'VendorDriver', linkage: 'shared'
+      }
+      nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
+    }
+
+    VendorDriver(JniNativeLibrarySpec) {
+      enableCheckTask true
+      javaCompileTasks << compileJava
+      jniCrossCompileOptions << JniCrossCompileOptions(nativeUtils.wpi.platforms.systemcore)
+      // Leave these for future proofing
+      jniCrossCompileOptions << JniCrossCompileOptions(nativeUtils.wpi.platforms.linuxarm64)
+      sources {
+        cpp {
+          source {
+            srcDirs 'src/main/driver/cpp'
+            include '**/*.cpp'
+          }
+          exportedHeaders {
+            srcDirs 'src/main/driver/include'
+          }
+        }
+      }
+
+      nativeUtils.useRequiredLibrary(it, "driver_shared")
+    }
+  }
+  testSuites {
+    VendorTest {
+        sources.cpp {
+            source {
+                srcDir 'src/test/native/cpp'
+                include '**/*.cpp'
+            }
+        }
+
+        binaries.all {
+          lib library: 'VendorDriver', linkage: 'shared'
+
+          def arch = it.targetPlatform.name
+          if (systemArch == arch && it.buildType.name == 'debug') {
+            def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
+            test.dependsOn it.tasks.install
+            test.systemProperty 'java.library.path', filePath
+            test.environment 'LD_LIBRARY_PATH', filePath
+            test.workingDir filePath
+          }
+        }
+
+        nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
+    }
+
+    VendorDriverTest {
+        sources.cpp {
+            source {
+                srcDir 'src/test/driver/cpp'
+                include '**/*.cpp'
+            }
+        }
+        nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
+    }
+  }
+}
+
+apply from: 'publish.gradle'
+
+wrapper {
+  gradleVersion = '9.4.1'
+}
