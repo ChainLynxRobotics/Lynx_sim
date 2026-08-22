@@ -1,6 +1,10 @@
 package com.vendor.jni;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
+
+import com.chainlynx8248.Lynx_sim.VendorJNI;
 
 public class VendorJNITest {
   @Test
@@ -11,6 +15,7 @@ public class VendorJNITest {
     VendorJNI.counterValue(counterPtr);
     VendorJNI.incrementCounter(counterPtr);
     VendorJNI.incrementCounter(counterPtr);
+    assertEquals(2, VendorJNI.counterValue(counterPtr));
     VendorJNI.deallocCounter(counterPtr);
   }
 }

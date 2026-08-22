@@ -16,22 +16,7 @@ impl Counter {
     }
 }
 
-#[jni_mangle("com.vendor.jni.VendorJNI")]
-pub fn hello<'caller>(
-    mut unowned_env: EnvUnowned<'caller>,
-    class: JClass<'caller>,
-    input: JString<'caller>,
-) -> JString<'caller> {
-    let outcome = unowned_env.with_env(|env| -> Result<_, Error> {
-        let input = input.to_string();
-        let class_name = class.get_name(env)?.to_string();
-        JString::from_str(env, format!("Hello, {}. \nFrom {}.", input, class_name))
-    });
-
-    outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
-}
-
-#[jni_mangle("com.vendor.jni.VendorJNI")]
+#[jni_mangle("com.chainlynx8248.Lynx_sim.VendorJNI")]
 pub fn new_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
@@ -43,7 +28,7 @@ pub fn new_counter<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("com.vendor.jni.VendorJNI")]
+#[jni_mangle("com.chainlynx8248.Lynx_sim.VendorJNI")]
 pub unsafe fn increment_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
@@ -60,7 +45,7 @@ pub unsafe fn increment_counter<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("com.vendor.jni.VendorJNI")]
+#[jni_mangle("com.chainlynx8248.Lynx_sim.VendorJNI")]
 pub unsafe fn counter_value<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,
@@ -75,7 +60,7 @@ pub unsafe fn counter_value<'caller>(
     outcome.resolve::<jni::errors::ThrowRuntimeExAndDefault>()
 }
 
-#[jni_mangle("com.vendor.jni.VendorJNI")]
+#[jni_mangle("com.chainlynx8248.Lynx_sim.VendorJNI")]
 pub unsafe fn dealloc_counter<'caller>(
     mut unowned_env: EnvUnowned<'caller>,
     _class: JClass<'caller>,

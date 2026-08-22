@@ -1,4 +1,4 @@
-package com.vendor.jni;
+package com.chainlynx8248.Lynx_sim;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

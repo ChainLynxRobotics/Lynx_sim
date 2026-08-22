@@ -15,6 +15,9 @@ ext.wpilibVersion = "2027.+"
 
 repositories {
   mavenCentral()
+  maven {
+    url = uri("${project.getRootDir()}/../target/zips")
+  }
 }
 wpilibRepositories.use2027Repos()
 if (project.hasProperty('releaseMode')) {
@@ -80,13 +83,25 @@ javadoc {
 nativeUtils {
   exportsConfigs {
     // Main library is just default empty. This will export everything
-    Vendor {
+    Lynx_sim {
     }
   }
-  privateExportsConfigs {
-    // Only export explicit symbols from driver library
-    VendorDriver {
-      exportsFile = project.file("src/main/driver/symbols.txt")
+
+  nativeDependencyContainer {
+    libswerve_sim_3d(getNativeDependencyTypeClass('WPISharedMavenDependency')) {
+      version = "2027.0.0"
+      groupId = "com.chainlynx8248"
+      artifactId = "libswerve_sim_3d"
+      ext = "zip"
+
+      targetPlatforms = [
+        "windowsx86-64",
+        "windowsarm64",
+        "linuxarm64",
+        "linuxx86-64",
+        "linuxarm32",
+        "osxuniversal"
+      ]
     }
   }
 }
@@ -99,7 +114,7 @@ def systemArch = getCurrentArch()
 
 model {
   components {
-    Vendor(NativeLibrarySpec) {
+    Lynx_sim(NativeLibrarySpec) {
       sources {
         cpp {
           source {
@@ -111,35 +126,11 @@ model {
           }
         }
       }
-      binaries.all {
-        lib library: 'VendorDriver', linkage: 'shared'
-      }
-      nativeUtils.useRequiredLibrary(it, 'wpilib_shared')
-    }
-
-    VendorDriver(JniNativeLibrarySpec) {
-      enableCheckTask true
-      javaCompileTasks << compileJava
-      jniCrossCompileOptions << JniCrossCompileOptions(nativeUtils.wpi.platforms.systemcore)
-      // Leave these for future proofing
-      jniCrossCompileOptions << JniCrossCompileOptions(nativeUtils.wpi.platforms.linuxarm64)
-      sources {
-        cpp {
-          source {
-            srcDirs 'src/main/driver/cpp'
-            include '**/*.cpp'
-          }
-          exportedHeaders {
-            srcDirs 'src/main/driver/include'
-          }
-        }
-      }
-
-      nativeUtils.useRequiredLibrary(it, "driver_shared")
+      nativeUtils.useRequiredLibrary(it, 'libswerve_sim_3d')
     }
   }
   testSuites {
-    VendorTest {
+    Lynx_simTest {
         sources.cpp {
             source {
                 srcDir 'src/test/native/cpp'
@@ -148,30 +139,60 @@ model {
         }
 
         binaries.all {
-          lib library: 'VendorDriver', linkage: 'shared'
-
           def arch = it.targetPlatform.name
           if (systemArch == arch && it.buildType.name == 'debug') {
             def filePath = it.tasks.install.installDirectory.get().toString() + File.separatorChar + 'lib'
             test.dependsOn it.tasks.install
+            test.dependsOn copyRustLibsForTests
             test.systemProperty 'java.library.path', filePath
             test.environment 'LD_LIBRARY_PATH', filePath
             test.workingDir filePath
           }
         }
 
-        nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
+        nativeUtils.useRequiredLibrary(it, "libswerve_sim_3d", "googletest_static")
     }
+  }
+}
 
-    VendorDriverTest {
-        sources.cpp {
-            source {
-                srcDir 'src/test/driver/cpp'
-                include '**/*.cpp'
-            }
-        }
-        nativeUtils.useRequiredLibrary(it, "wpilib_shared", "googletest_static")
-    }
+def rust_triple(targetPlatform) {
+  def platformName = targetPlatform
+  if (platformName == "linuxathena") {
+    return "arm-unknown-linux-gnueabi"
+  } else if (platformName == "linuxarm32") {
+    return "arm-unknown-linux-gnueabihf"
+  } else if (platformName == "linuxarm64") {
+    return "aarch64-unknown-linux-gnu"
+  } else if (platformName == "linuxx86-64") {
+    return "x86_64-unknown-linux-gnu"
+  } else if (platformName == "osxuniversal") {
+    return "aarch64-apple-darwin"
+  } else if (platformName == "windowsx86-64") {
+    return "x86_64-pc-windows-msvc"
+  } else if (platformName == "windowsarm64") {
+    return "aarch64-pc-windows-msvc"
+  } else {
+      println "Unknown target platform $platformName"
+      return null
+  }
+}
+
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+task copyRustLibsForTests() {
+  def rustTriple = rust_triple(systemArch)
+  def outdir = "libs/swerve_sim_3d/"
+  def sharedOutDir = project.getLayout().getBuildDirectory().dir(outdir + "shared/${systemArch}/release") 
+  def staticOutDir = project.getLayout().getBuildDirectory().dir(outdir + "static/${systemArch}/debug") 
+  def indir = "../target/${rustTriple}/";
+  copy {
+    from project.getLayout().getProjectDirectory().dir(indir + "release-full/libswerve_sim_3d.so")
+    into sharedOutDir
+  }
+  copy {
+    from project.getLayout().getProjectDirectory().dir(indir + "debug/libswerve_sim_3d.so")
+    into staticOutDir
   }
 }
 
