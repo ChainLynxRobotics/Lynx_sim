@@ -22,8 +22,8 @@ const TOTAL_FUEL: usize = 504;
 const FUEL_OFFSET: unit!(m, f32) = rescale!(quantity!(72.0 / 12.0, inch, f32), m, f32);
 const FUEL_RADIUS: unit!(m, f32) = quantity!(0.075, m, f32);
 
-impl Field for RebuiltField {
-    fn new(physics_world: &mut PhysicsWorld) -> Box<Self> {
+impl RebuiltField {
+    fn new(physics_world: &mut PhysicsWorld) -> Self {
         let field = RigidBodyBuilder::fixed();
         let field = physics_world.rigid_body_set.insert(field);
         // TODO: Use halfspaces here
@@ -297,13 +297,15 @@ impl Field for RebuiltField {
             &mut physics_world.rigid_body_set,
         );
 
-        Box::new(RebuiltField {
+        RebuiltField {
             fuel,
             blue_score: 0,
             red_score: 0,
-        })
+        }
     }
+}
 
+impl Field for RebuiltField {
     fn update(&mut self, physics_world: &mut PhysicsWorld) {
         // TODO: update scores
     }
