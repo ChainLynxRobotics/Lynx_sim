@@ -23,7 +23,7 @@ const FUEL_OFFSET: unit!(m, f32) = rescale!(quantity!(72.0 / 12.0, inch, f32), m
 const FUEL_RADIUS: unit!(m, f32) = quantity!(0.075, m, f32);
 
 impl RebuiltField {
-    fn new(physics_world: &mut PhysicsWorld) -> Self {
+    pub fn new(physics_world: &mut PhysicsWorld) -> Self {
         let field = RigidBodyBuilder::fixed();
         let field = physics_world.rigid_body_set.insert(field);
         // TODO: Use halfspaces here
