@@ -2,7 +2,7 @@ use jni::{
     EnvUnowned,
     errors::Error,
     jni_mangle,
-    objects::{JClass, JString},
+    objects::JClass,
     sys::{jint, jlong},
 };
 

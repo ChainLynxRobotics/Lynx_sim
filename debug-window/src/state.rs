@@ -1,7 +1,7 @@
-use std::{collections::VecDeque, sync::Arc};
+use std::sync::Arc;
 
 use ipc_channel::ipc::IpcReceiver;
-use ipc_types::{DebugLine, Frame, Message};
+use ipc_types::{DebugLine, Frame};
 use wgpu::{
     BindGroup, BindGroupDescriptor, BindGroupEntry, BindGroupLayoutDescriptor, BlendState, Buffer,
     BufferUsages, ColorWrites, Features, MultisampleState,
