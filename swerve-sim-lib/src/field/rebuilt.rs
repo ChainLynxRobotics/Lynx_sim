@@ -12,6 +12,8 @@ use crate::{SLEEP_THRESHOLD, inch_to_m};
 
 pub struct RebuiltField {
     fuel: Vec<RigidBodyHandle>,
+    blue_score: u64,
+    red_score: u64,
 }
 
 const WIDTH: unit!(m, f32) = rescale!(quantity!(651.22, inch, f32), m, f32);
@@ -295,19 +297,23 @@ impl Field for RebuiltField {
             &mut physics_world.rigid_body_set,
         );
 
-        Box::new(RebuiltField { fuel })
+        Box::new(RebuiltField {
+            fuel,
+            blue_score: 0,
+            red_score: 0,
+        })
     }
 
     fn update(&mut self, physics_world: &mut PhysicsWorld) {
         todo!()
     }
 
-    fn get_blue_score(&self, physics_world: &PhysicsWorld) -> u64 {
-        todo!()
+    fn get_blue_score(&self, _physics_world: &PhysicsWorld) -> u64 {
+        self.blue_score
     }
 
-    fn get_red_score(&self, physics_world: &PhysicsWorld) -> u64 {
-        todo!()
+    fn get_red_score(&self, _physics_world: &PhysicsWorld) -> u64 {
+        self.red_score
     }
 }
 
