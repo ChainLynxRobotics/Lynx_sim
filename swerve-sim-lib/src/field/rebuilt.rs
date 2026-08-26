@@ -305,7 +305,7 @@ impl Field for RebuiltField {
     }
 
     fn update(&mut self, physics_world: &mut PhysicsWorld) {
-        todo!()
+        // TODO: update scores
     }
 
     fn get_blue_score(&self, _physics_world: &PhysicsWorld) -> u64 {
