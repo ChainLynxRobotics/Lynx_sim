@@ -6,6 +6,9 @@ use jni::{
     sys::{jint, jlong},
 };
 
+pub mod rebuilt;
+pub mod world;
+
 #[derive(Default)]
 struct Counter {
     count: i32,
