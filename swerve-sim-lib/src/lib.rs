@@ -1,4 +1,6 @@
 #![feature(random, unboxed_closures)]
+
+use include_dir::{Dir, include_dir};
 use rapier3d::geometry::{Group, InteractionGroups, InteractionTestMode::Or};
 
 pub mod field;
@@ -24,6 +26,8 @@ pub const FIELD_INTERACTION_GROUPS: InteractionGroups =
     InteractionGroups::new(Group::GROUP_1, Group::all(), Or);
 
 pub const SLEEP_THRESHOLD: f32 = 0.1;
+
+pub static ASSET_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets/");
 
 #[macro_export]
 macro_rules! inch_to_m {

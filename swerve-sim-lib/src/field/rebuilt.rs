@@ -114,24 +114,12 @@ impl RebuiltField {
         });
 
         let mut path;
-        #[cfg(not(feature = "distribution"))]
-        {
-            path = std::env::current_exe().expect("couldn't get execution path");
-            path.pop();
-            path.pop();
-            path.pop();
-            path.push("swerve-sim-lib");
-            path.push("assets");
-            path.push("Hub.stl");
-        }
-        #[cfg(feature = "distribution")]
-        {
-            use std::path::PathBuf;
+        use crate::ASSET_DIR;
 
-            path =
-                PathBuf::from(std::env::var("LYNX_SIM_ASSETS").expect("couldn't get asset path"));
-            path.push("Hub.stl");
-        }
+        let hub = ASSET_DIR.get_file("Hub.stl").unwrap();
+        path = std::env::temp_dir();
+        path.push("Hub.stl");
+        std::fs::write(&path, hub.contents()).expect("Couldn't write Hub.stl to /tmp");
 
         let hub: Vec<SharedShape> = load_from_path(
             path,

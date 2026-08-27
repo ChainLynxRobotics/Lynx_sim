@@ -16,6 +16,7 @@ whippyunits = "0.2.6"
 ipc-types = { path = "../ipc-types" }
 rapier3d-meshloader = { version = "0.35.1", default-features = false, features = [ "stl" ] }
 jni = "0.22.4"
+include_dir = "0.7.4"
 [features]
 default = ["debug_renderer"]
 debug_renderer = []
