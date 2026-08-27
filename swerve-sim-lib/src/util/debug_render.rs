@@ -1,4 +1,6 @@
 use std::{
+    fs::File,
+    os::unix::fs::PermissionsExt,
     process::Command,
     sync::mpsc::{self, Receiver, Sender},
     thread::JoinHandle,
@@ -14,7 +16,7 @@ use rapier3d::{
     },
 };
 
-use crate::physics_world::PhysicsWorld;
+use crate::{DEBUG_WINDOW, physics_world::PhysicsWorld};
 fn hsla_to_rgb(hsla: rapier3d::prelude::DebugColor) -> (f32, f32, f32, f32) {
     let h = hsla[0];
     let s = hsla[1];
@@ -85,12 +87,17 @@ pub struct DebugWindow {
 }
 impl DebugWindow {
     pub fn spawn_debug_window() -> Self {
-        let mut path = std::env::current_exe().unwrap();
-        path.pop();
+        let mut path = std::env::temp_dir();
         #[cfg(target_os = "windows")]
         path.push("debug-window.exe");
         #[cfg(not(target_os = "windows"))]
         path.push("debug-window");
+        println!("Path: {:?}", path);
+        std::fs::write(&path, DEBUG_WINDOW).expect("Couldnt write debug window to /tmp");
+        let debug_window = File::open(&path).expect("Couldnt open debug window");
+        let mut perms = debug_window.metadata().unwrap().permissions();
+        perms.set_mode(0o777);
+        debug_window.set_permissions(perms.clone()).unwrap();
 
         let (server, token) =
             IpcOneShotServer::<IpcSender<Frame>>::new().expect("Failed to create one shot server");

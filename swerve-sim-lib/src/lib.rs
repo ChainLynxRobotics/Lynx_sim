@@ -28,6 +28,8 @@ pub const FIELD_INTERACTION_GROUPS: InteractionGroups =
 pub const SLEEP_THRESHOLD: f32 = 0.1;
 
 pub static ASSET_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets/");
+pub const DEBUG_WINDOW: &'static [u8] =
+    include_bytes!(std::env!("CARGO_BIN_FILE_DEBUG_WINDOW_debug-window"));
 
 #[macro_export]
 macro_rules! inch_to_m {
