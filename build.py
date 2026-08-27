@@ -42,13 +42,13 @@ def build(platform):
     print("No Triple found for {}".format(platform), file=sys.stderr)
     exit(1)
 
-  run("cargo", "build", "--target={}".format(triple))
-  run("cargo", "build", "--profile", "release-full", "--target={}".format(triple))
+  run("cargo", "build", "--target={}".format(triple), "--features", "distribution")
+  run("cargo", "build", "--profile", "release-full", "--target={}".format(triple), "--features", "distribution")
 
   # OSX builds universal by building both and then merging
   if platform == "osxuniversal":
-    run("cargo", "build", "--target=x86_64-apple-darwin")
-    run("cargo", "build", "--profile", "release-full", "--target=x86_64-apple-darwin")
+    run("cargo", "build", "--target=x86_64-apple-darwin", "--features", "distribution")
+    run("cargo", "build", "--profile", "release-full", "--target=x86_64-apple-darwin", "--features", "distribution")
 
     for mode in ["debug", "release-full"]:
       mode_dir = f"target/universal-apple-darwin/{mode}"

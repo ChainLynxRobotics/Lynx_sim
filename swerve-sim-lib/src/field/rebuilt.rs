@@ -114,12 +114,20 @@ impl RebuiltField {
         });
 
         let mut path = std::env::current_exe().expect("coulent get execution path");
-        path.pop();
-        path.pop();
-        path.pop();
-        path.push("swerve-sim-lib");
-        path.push("assets");
-        path.push("Hub.stl");
+        #[cfg(not(feature = "distribution"))]
+        {
+            path.pop();
+            path.pop();
+            path.pop();
+            path.push("swerve-sim-lib");
+            path.push("assets");
+            path.push("Hub.stl");
+        }
+        #[cfg(feature = "distribution")]
+        {
+            path.pop();
+            path.push("Hub.stl");
+        }
 
         let hub: Vec<SharedShape> = load_from_path(
             path,

@@ -19,3 +19,4 @@ jni = "0.22.4"
 [features]
 default = ["debug_renderer"]
 debug_renderer = []
+distribution = []
