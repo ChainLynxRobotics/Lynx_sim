@@ -137,6 +137,8 @@ model {
                 include '**/*.cpp'
             }
         }
+        def assetPath = project.getLayout().getProjectDirectory().dir("../swerve-sim-lib/assets/")
+        test.environment 'LYNX_SIM_ASSETS', assetPath
 
         binaries.all {
           def arch = it.targetPlatform.name

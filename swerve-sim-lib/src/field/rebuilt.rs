@@ -113,9 +113,10 @@ impl RebuiltField {
             );
         });
 
-        let mut path = std::env::current_exe().expect("coulent get execution path");
+        let mut path;
         #[cfg(not(feature = "distribution"))]
         {
+            path = std::env::current_exe().expect("couldn't get execution path");
             path.pop();
             path.pop();
             path.pop();
@@ -125,7 +126,10 @@ impl RebuiltField {
         }
         #[cfg(feature = "distribution")]
         {
-            path.pop();
+            use std::path::PathBuf;
+
+            path =
+                PathBuf::from(std::env::var("LYNX_SIM_ASSETS").expect("couldn't get asset path"));
             path.push("Hub.stl");
         }
 
