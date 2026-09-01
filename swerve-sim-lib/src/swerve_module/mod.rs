@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-use rapier3d::dynamics::{ImpulseJointSet, RigidBody};
+use rapier3d::dynamics::{FixedJointBuilder, MultibodyJointSet, RigidBody};
 use rapier3d::math::{AngVector, Pose};
 use rapier3d::{
     math::Vector,
@@ -35,12 +35,13 @@ impl SwerveModule {
         drive_base: RigidBodyHandle,
         rigid_body_set: &mut RigidBodySet,
         collider_set: &mut ColliderSet,
-        joint_set: &mut ImpulseJointSet,
+        joint_set: &mut MultibodyJointSet,
     ) -> Self {
+        let azumith_pose = drive_base_position.prepend_translation(
+            module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
+        );
         let azumith = RigidBodyBuilder::dynamic()
-            .pose(drive_base_position.prepend_translation(
-                module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
-            ))
+            .pose(azumith_pose)
             .gyroscopic_forces_enabled(false)
             .build();
         let azumith_colider = ColliderBuilder::cylinder(
@@ -67,11 +68,11 @@ impl SwerveModule {
             activation.normalized_linear_threshold = SLEEP_THRESHOLD;
         }
         collider_set.insert_with_parent(azumith_colider, azumith, rigid_body_set);
-
+        let wheel_pose = drive_base_position.prepend_translation(
+            module_center + Vector::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
+        );
         let wheel = RigidBodyBuilder::dynamic()
-            .pose(drive_base_position.prepend_translation(
-                module_center + Vector::new(0.0, 0.0, value!(config.wheel_center_height, m, f32)),
-            ))
+            .pose(wheel_pose)
             .gyroscopic_forces_enabled(false)
             .build();
         let wheel_colider = ColliderBuilder::cylinder(
@@ -98,18 +99,24 @@ impl SwerveModule {
             activation.normalized_linear_threshold = SLEEP_THRESHOLD;
         }
         collider_set.insert_with_parent(wheel_colider, wheel, rigid_body_set);
-
-        let azumith_joint = RevoluteJointBuilder::new(Vector::Z)
-            .local_anchor1(Vector::ZERO)
-            .local_anchor2(
+        let azumith_rotation_body = RigidBodyBuilder::dynamic().pose(azumith_pose);
+        let azumith_rotation_body = rigid_body_set.insert(azumith_rotation_body);
+        let azumith_fixed_joint = FixedJointBuilder::new()
+            .local_anchor1(
                 module_center + Vector::new(0.0, 0.0, value!(config.azumith_center_height, m, f32)),
             )
-            .build();
-        joint_set.insert(azumith, drive_base, azumith_joint, true);
-
-        let wheel_joint = RevoluteJointBuilder::new(Vector::Y)
+            .local_anchor2(Vector::ZERO);
+        let azumith_joint = RevoluteJointBuilder::new(Vector::Z)
             .local_anchor1(Vector::ZERO)
-            .local_anchor2(Vector::new(
+            .local_anchor2(Vector::ZERO)
+            .build();
+        joint_set.insert(drive_base, azumith_rotation_body, azumith_fixed_joint, true);
+        joint_set.insert(azumith_rotation_body, azumith, azumith_joint, true);
+
+        let wheel_rotation_body = RigidBodyBuilder::dynamic().pose(wheel_pose);
+        let wheel_rotation_body = rigid_body_set.insert(wheel_rotation_body);
+        let wheel_fixed_joint = FixedJointBuilder::new()
+            .local_anchor1(Vector::new(
                 0.0,
                 0.0,
                 value!(
@@ -118,8 +125,13 @@ impl SwerveModule {
                     f32
                 ),
             ))
+            .local_anchor2(Vector::ZERO);
+        let wheel_joint = RevoluteJointBuilder::new(Vector::Y)
+            .local_anchor1(Vector::ZERO)
+            .local_anchor2(Vector::ZERO)
             .build();
-        joint_set.insert(wheel, azumith, wheel_joint, true);
+        joint_set.insert(azumith, wheel_rotation_body, wheel_fixed_joint, true);
+        joint_set.insert(wheel_rotation_body, wheel, wheel_joint, true);
 
         return SwerveModule {
             config,

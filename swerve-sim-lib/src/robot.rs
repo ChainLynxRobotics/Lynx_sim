@@ -92,7 +92,7 @@ impl<const NUMBER_OF_SWERVE_MODULES: usize> Robot<NUMBER_OF_SWERVE_MODULES> {
                 drive_base,
                 &mut physics_world.rigid_body_set,
                 &mut physics_world.collider_set,
-                &mut physics_world.impulse_joint_set,
+                &mut physics_world.multibody_joint_set,
             )
         });
         Robot {
