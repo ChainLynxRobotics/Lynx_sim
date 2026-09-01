@@ -50,7 +50,6 @@
                 vulkan-loader
               ]
             );
-            shellHook = "zsh";
           };
         }
       ) nixpkgs.legacyPackages;
