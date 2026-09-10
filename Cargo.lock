@@ -950,7 +950,6 @@ dependencies = [
 name = "ipc-types"
 version = "0.1.0"
 dependencies = [
- "ipc-channel",
  "serde",
 ]
 
