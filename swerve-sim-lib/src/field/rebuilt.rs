@@ -3,7 +3,7 @@ use std::f32::consts::PI;
 use rapier3d::dynamics::{RigidBodyBuilder, RigidBodyHandle};
 use rapier3d::geometry::{ColliderBuilder, SharedShape};
 use rapier3d::math::{Pose, Vector};
-use rapier3d_meshloader::load_from_path;
+use rapier3d_meshloader::{FileType, load_from_slice};
 use whippyunits::{quantity, rescale, unit, value};
 
 use crate::field::Field;
@@ -113,16 +113,13 @@ impl RebuiltField {
             );
         });
 
-        let mut path;
         use crate::ASSET_DIR;
 
         let hub = ASSET_DIR.get_file("Hub.stl").unwrap();
-        path = std::env::temp_dir();
-        path.push("Hub.stl");
-        std::fs::write(&path, hub.contents()).expect("Couldn't write Hub.stl to /tmp");
 
-        let hub: Vec<SharedShape> = load_from_path(
-            path,
+        let hub: Vec<SharedShape> = load_from_slice(
+            hub.contents(),
+            FileType::Stl,
             &rapier3d::geometry::MeshConverter::TriMesh,
             Vector::ONE,
         )
