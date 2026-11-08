@@ -38,6 +38,7 @@
               temurin-bin-25
               self.packages.${system}.gplusplus14
               gradle_9
+              python3
             ];
 
             hardeningDisable = [ "fortify" ];
