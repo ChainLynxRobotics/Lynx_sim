@@ -22,7 +22,7 @@ use swerve_sim_3d::{
 pub const SIMULATION_FREQUENCY: unit!(Hz, f32) = quantity!(500.0, Hz, f32);
 pub const SIMULATION_TIMESTEP: unit!(s, f32) =
     quantity!(1.0 / value!(SIMULATION_FREQUENCY, Hz, f32), s, f32);
-pub const SUB_STEPS: u32 = 10;
+pub const SUB_STEPS: u32 = 1;
 
 fn main() {
     let mut window = DebugWindow::spawn_debug_window();
@@ -85,7 +85,7 @@ fn main() {
             <= Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
         {
             thread::sleep(
-                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32))
+                Duration::from_secs_f32(value!(SIMULATION_TIMESTEP * SUB_STEPS as f32, s, f32)) * 5
                     - processing_time,
             );
         } else {
